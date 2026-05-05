@@ -240,7 +240,68 @@
             margin-top: 40px;
             font-size: 15px;
         }
+        /* PWA móvil */
+@media (max-width: 768px) {
+    .layout {
+        grid-template-columns: 1fr;
+        grid-template-rows: 1fr auto;
+    }
+
+    .panel-carrito {
+        border-left: none;
+        border-top: 2px solid #ddd;
+        max-height: 45vh;
+    }
+
+    .grid-productos {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    }
+
+    .producto-card .precio {
+        font-size: 20px;
+    }
+
+    .btn-cobrar {
+        font-size: 26px;
+        padding: 20px;
+    }
+
+    .buscador {
+        font-size: 20px;
+        padding: 16px;
+    }
+    }
+
+/* Accesibilidad +40 años */
+@media (min-width: 769px) {
+    .producto-card {
+        padding: 18px;
+        min-height: 100px;
+    }
+
+    .producto-card .nombre {
+        font-size: 16px;
+    }
+
+    .producto-card .precio {
+        font-size: 22px;
+    }
+
+    .btn-cobrar {
+        font-size: 26px;
+        padding: 22px;
+    }
+    }
     </style>
+    <link rel="manifest" href="/manifest.json">
+        <meta name="theme-color" content="#000000">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-title" content="POS Ferretero">
+        <script>
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('/sw.js');
+                }
+        </script>
 </head>
 <body>
 
