@@ -7,6 +7,7 @@ use App\Models\VentaDetalle;
 use App\Models\Producto;
 use App\Models\Cliente;
 use Illuminate\Http\Request;
+use App\Jobs\EnviarFacturaAlegra;
 use Illuminate\Support\Facades\DB;
 
 class VentaController extends Controller
@@ -98,7 +99,10 @@ class VentaController extends Controller
                 $detalle['venta_id'] = $venta->id;
                 VentaDetalle::create($detalle);
             }
-
+// Despachar factura electrónica si el tenant la tiene activa
+if ($request->tipo_documento === 'factura_electronica') {
+    EnviarFacturaAlegra::dispatch($venta)->delay(now()->addSeconds(5));
+}
             DB::commit();
 
             return response()->json([
