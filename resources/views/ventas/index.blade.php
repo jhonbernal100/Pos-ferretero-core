@@ -1,68 +1,60 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ventas</title>
-    <style>
-        body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }
-        h1 { font-size: 22px; margin-bottom: 16px; }
-        .btn { padding: 10px 20px; background: #000; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; text-decoration: none; display: inline-block; margin-bottom: 16px; }
-        table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 8px; overflow: hidden; }
-        th { background: #000; color: #fff; padding: 10px; text-align: left; font-size: 13px; }
-        td { padding: 10px; border-bottom: 1px solid #eee; font-size: 13px; }
-        .badge { padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: bold; }
-        .badge-completada { background: #d4edda; color: #155724; }
-        .badge-anulada { background: #f8d7da; color: #721c24; }
-        .link { color: #000; text-decoration: underline; cursor: pointer; }
-    </style>
-</head>
-<body>
-    <h1>Ventas del día</h1>
-    <a href="{{ route('ventas.crear') }}" class="btn">+ Nueva venta</a>
+@extends('layouts.pos')
 
-    <table>
-        <thead>
-            <tr>
-                <th>#</th>
-                <th>Fecha</th>
-                <th>Cliente</th>
-                <th>Total</th>
-                <th>Pago</th>
-                <th>Estado</th>
-                <th>Acciones</th>
-            </tr>
-        </thead>
-        <tbody>
-            @forelse($ventas as $venta)
-            <tr>
-                <td>{{ str_pad($venta->id, 6, '0', STR_PAD_LEFT) }}</td>
-                <td>{{ $venta->created_at->format('d/m/Y H:i') }}</td>
-                <td>{{ $venta->cliente->nombre ?? 'Consumidor final' }}</td>
-                <td>$ {{ number_format($venta->total, 0, ',', '.') }}</td>
-                <td>{{ ucfirst($venta->metodo_pago) }}</td>
-                <td><span class="badge badge-{{ $venta->estado }}">{{ ucfirst($venta->estado) }}</span></td>
-                <td>
-                    <a href="{{ route('ventas.ticket', $venta->id) }}" class="link" target="_blank">Ticket</a>
-                </td>
-            </tr>
-            @empty
-            <tr><td colspan="7" style="text-align:center; color:#999;">No hay ventas aún</td></tr>
-            @endforelse
-        </tbody>
-    </table>
+@section('titulo', 'Historial de Ventas')
 
-    {{ $ventas->links() }}
+@section('contenido')
+<div style="padding:16px;max-width:1200px;margin:0 auto;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+        <h1 style="font-size:22px;">Ventas del día</h1>
+        <a href="/ventas/crear" style="padding:10px 20px;background:#000;color:#fff;border-radius:8px;text-decoration:none;font-size:14px;">+ Nueva venta</a>
+    </div>
 
-    <footer style="text-align:center;padding:16px;font-size:11px;color:#aaa;margin-top:20px;">
-    Sistema POS desarrollado por
-    <a href="https://www.avanzas.digital/index.html" target="_blank" style="color:#000;font-weight:bold;">
-        Avanzas Digital
-    </a>
-    &nbsp;·&nbsp;
-    <a href="https://www.avanzas.digital/index.html" target="_blank" style="color:#000;">
-        ¿Quieres este sistema? Contáctanos
-    </a>
-</footer>
-</body>
-</html>
+    <div style="background:#fff;border-radius:12px;overflow:hidden;">
+        <table style="width:100%;border-collapse:collapse;">
+            <thead>
+                <tr style="background:#000;color:#fff;">
+                    <th style="padding:12px;text-align:left;font-size:13px;">#</th>
+                    <th style="padding:12px;text-align:left;font-size:13px;">Fecha</th>
+                    <th style="padding:12px;text-align:left;font-size:13px;">Cliente</th>
+                    <th style="padding:12px;text-align:left;font-size:13px;">Total</th>
+                    <th style="padding:12px;text-align:left;font-size:13px;">Pago</th>
+                    <th style="padding:12px;text-align:left;font-size:13px;">Estado</th>
+                    <th style="padding:12px;text-align:left;font-size:13px;">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($ventas as $venta)
+                <tr style="border-bottom:1px solid #eee;">
+                    <td style="padding:12px;font-size:13px;">{{ str_pad($venta->id, 6, '0', STR_PAD_LEFT) }}</td>
+                    <td style="padding:12px;font-size:13px;">{{ $venta->created_at->format('d/m/Y H:i') }}</td>
+                    <td style="padding:12px;font-size:13px;">{{ $venta->cliente->nombre ?? 'Consumidor final' }}</td>
+                    <td style="padding:12px;font-size:13px;">$ {{ number_format($venta->total, 0, ',', '.') }}</td>
+                    <td style="padding:12px;font-size:13px;">{{ ucfirst($venta->metodo_pago) }}</td>
+                    <td style="padding:12px;">
+                        <span style="padding:3px 10px;border-radius:12px;font-size:11px;font-weight:bold;
+                            background:{{ $venta->estado === 'completada' ? '#d4edda' : '#f8d7da' }};
+                            color:{{ $venta->estado === 'completada' ? '#155724' : '#721c24' }};">
+                            {{ ucfirst($venta->estado) }}
+                        </span>
+                    </td>
+                    <td style="padding:12px;">
+                        <a href="/ventas/{{ $venta->id }}/ticket" target="_blank"
+                           style="color:#000;text-decoration:underline;font-size:13px;">
+                            Ticket
+                        </a>
+                    </td>
+                </tr>
+                @empty
+                <tr>
+                    <td colspan="7" style="padding:24px;text-align:center;color:#999;">No hay ventas aún</td>
+                </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+
+    <div style="margin-top:16px;">
+        {{ $ventas->links() }}
+    </div>
+</div>
+@endsection

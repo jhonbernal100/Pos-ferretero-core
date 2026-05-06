@@ -52,12 +52,6 @@
         .toolbar a:hover { background: #333; }
         .toolbar a.activo { background: #fff; color: #000; font-weight: bold; }
 
-        .toolbar-logout {
-            margin-left: auto;
-            background: #c00 !important;
-            border-color: #900 !important;
-        }
-
         .contenido-principal { flex: 1; }
 
         .footer-avanzas {
@@ -70,7 +64,6 @@
 
         .footer-avanzas a { color: #fff; text-decoration: none; font-weight: bold; }
 
-        /* Alerta de suscripción próxima a vencer */
         .alerta-trial {
             background: #fff3cd;
             color: #856404;
@@ -100,7 +93,6 @@
         </div>
     </nav>
 
-    {{-- Toolbar según rol --}}
     <div class="toolbar">
         <a href="/ventas/crear"
            class="{{ request()->is('ventas/crear') ? 'activo' : '' }}">
@@ -124,8 +116,16 @@
         </a>
 
         @if(auth()->user()->rol === 'dueno' || auth()->user()->rol === 'superadmin')
+            <a href="/proveedores"
+               class="{{ request()->is('proveedores*') ? 'activo' : '' }}">
+                🚚 Proveedores
+            </a>
+            <a href="/clientes"
+               class="{{ request()->is('clientes*') ? 'activo' : '' }}">
+                👥 Clientes
+            </a>
             <a href="/creditos"
-               class="{{ request()->is('creditos') ? 'activo' : '' }}">
+               class="{{ request()->is('creditos*') ? 'activo' : '' }}">
                 💳 Créditos
             </a>
             <a href="/ferreteria/perfil"
@@ -147,7 +147,6 @@
         </form>
     </div>
 
-    {{-- Alerta si el trial vence en menos de 7 días --}}
     @auth
     @if(auth()->user()->tenant && auth()->user()->tenant->subscription_status === 'trial')
         @php $dias = auth()->user()->tenant->diasRestantes(); @endphp
