@@ -6,8 +6,9 @@ use App\Models\Venta;
 use App\Models\VentaDetalle;
 use App\Models\Producto;
 use App\Models\Cliente;
-use Illuminate\Http\Request;
+use App\Models\Credito;
 use App\Jobs\EnviarFacturaAlegra;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class VentaController extends Controller
@@ -38,11 +39,11 @@ class VentaController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'items'                 => 'required|array|min:1',
-            'items.*.producto_id'   => 'required|exists:productos,id',
-            'items.*.cantidad'      => 'required|integer|min:1',
-            'metodo_pago'           => 'required|in:efectivo,transferencia,credito',
-            'monto_pagado'          => 'required|integer|min:0',
+            'items'               => 'required|array|min:1',
+            'items.*.producto_id' => 'required|exists:productos,id',
+            'items.*.cantidad'    => 'required|integer|min:1',
+            'metodo_pago'         => 'required|in:efectivo,transferencia,credito',
+            'monto_pagado'        => 'required|integer|min:0',
         ]);
 
         DB::beginTransaction();
@@ -72,8 +73,39 @@ class VentaController extends Controller
                     'subtotal'        => $itemSubtotal,
                 ];
 
-                // Descontar stock
                 $producto->decrement('stock', $item['cantidad']);
+            }
+
+            // Validar crédito si el método de pago es crédito
+            if ($request->metodo_pago === 'credito') {
+                if (!$request->cliente_id) {
+                    DB::rollBack();
+                    return response()->json([
+                        'success' => false,
+                        'mensaje' => 'Debes seleccionar un cliente para ventas a crédito',
+                    ], 422);
+                }
+
+                $credito = Credito::where('cliente_id', $request->cliente_id)
+                    ->where('tenant_id', session('tenant_id'))
+                    ->first();
+
+                if (!$credito) {
+                    DB::rollBack();
+                    return response()->json([
+                        'success' => false,
+                        'mensaje' => 'Este cliente no tiene línea de crédito configurada',
+                    ], 422);
+                }
+
+                if (!$credito->puedeComprar($subtotal)) {
+                    DB::rollBack();
+                    return response()->json([
+                        'success' => false,
+                        'mensaje' => 'Crédito insuficiente. Disponible: $ ' .
+                            number_format($credito->saldoDisponible(), 0, ',', '.'),
+                    ], 422);
+                }
             }
 
             $descuento   = $request->descuento ?? 0;
@@ -82,27 +114,36 @@ class VentaController extends Controller
             $cambio      = max(0, $montoPagado - $total);
 
             $venta = Venta::create([
-                'tenant_id'    => session('tenant_id'),
-                'cliente_id'   => $request->cliente_id,
+                'tenant_id'      => session('tenant_id'),
+                'cliente_id'     => $request->cliente_id,
                 'tipo_documento' => $request->tipo_documento ?? 'ticket',
-                'estado'       => 'completada',
-                'subtotal'     => $subtotal,
-                'descuento'    => $descuento,
-                'total'        => $total,
-                'metodo_pago'  => $request->metodo_pago,
-                'monto_pagado' => $montoPagado,
-                'cambio'       => $cambio,
-                'notas'        => $request->notas,
+                'estado'         => 'completada',
+                'subtotal'       => $subtotal,
+                'descuento'      => $descuento,
+                'total'          => $total,
+                'metodo_pago'    => $request->metodo_pago,
+                'monto_pagado'   => $montoPagado,
+                'cambio'         => $cambio,
+                'notas'          => $request->notas,
             ]);
 
             foreach ($detalles as $detalle) {
                 $detalle['venta_id'] = $venta->id;
                 VentaDetalle::create($detalle);
             }
-// Despachar factura electrónica si el tenant la tiene activa
-if ($request->tipo_documento === 'factura_electronica') {
-    EnviarFacturaAlegra::dispatch($venta)->delay(now()->addSeconds(5));
-}
+
+            // Actualizar saldo de crédito si aplica
+            if ($request->metodo_pago === 'credito' && $request->cliente_id) {
+                Credito::where('cliente_id', $request->cliente_id)
+                    ->where('tenant_id', session('tenant_id'))
+                    ->increment('saldo_usado', $total);
+            }
+
+            // Despachar factura electrónica si aplica
+            if ($request->tipo_documento === 'factura_electronica') {
+                EnviarFacturaAlegra::dispatch($venta)->delay(now()->addSeconds(5));
+            }
+
             DB::commit();
 
             return response()->json([
@@ -139,10 +180,16 @@ if ($request->tipo_documento === 'factura_electronica') {
         DB::beginTransaction();
 
         try {
-            // Devolver stock
             foreach ($venta->detalles as $detalle) {
                 Producto::where('id', $detalle->producto_id)
                     ->increment('stock', $detalle->cantidad);
+            }
+
+            // Revertir crédito si aplica
+            if ($venta->metodo_pago === 'credito' && $venta->cliente_id) {
+                Credito::where('cliente_id', $venta->cliente_id)
+                    ->where('tenant_id', $venta->tenant_id)
+                    ->decrement('saldo_usado', $venta->total);
             }
 
             $venta->update(['estado' => 'anulada']);
