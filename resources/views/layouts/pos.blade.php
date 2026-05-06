@@ -11,7 +11,7 @@
     <meta name="apple-mobile-web-app-title" content="POS Ferretero">
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: Arial, sans-serif; background: #f0f0f0; }
+        body { font-family: Arial, sans-serif; background: #f0f0f0; display: flex; flex-direction: column; min-height: 100vh; }
 
         .navbar {
             background: #000;
@@ -39,13 +39,26 @@
             transition: background .2s;
         }
 
-        .navbar-links a:hover {
-            background: rgba(255,255,255,0.15);
+        .navbar-links a:hover { background: rgba(255,255,255,0.15); }
+        .navbar-links a.activo { background: rgba(255,255,255,0.25); }
+
+        .contenido-principal { flex: 1; }
+
+        .footer-avanzas {
+            background: #000;
+            color: #888;
+            text-align: center;
+            padding: 10px 16px;
+            font-size: 11px;
         }
 
-        .navbar-links a.activo {
-            background: rgba(255,255,255,0.25);
+        .footer-avanzas a {
+            color: #fff;
+            text-decoration: none;
+            font-weight: bold;
         }
+
+        .footer-avanzas a:hover { text-decoration: underline; }
     </style>
     @yield('estilos')
     <script>
@@ -68,10 +81,27 @@
                class="{{ request()->is('ventas') ? 'activo' : '' }}">
                 Historial
             </a>
+            <a href="/inventario/capturar"
+               class="{{ request()->is('inventario/capturar') ? 'activo' : '' }}">
+                📷 Inventario
+            </a>
         </div>
     </nav>
 
-    @yield('contenido')
+    <div class="contenido-principal">
+        @yield('contenido')
+    </div>
+
+    <footer class="footer-avanzas">
+        Sistema POS desarrollado por
+        <a href="https://www.avanzas.digital/index.html" target="_blank" rel="noopener">
+            Avanzas Digital
+        </a>
+        &nbsp;·&nbsp;
+        <a href="https://www.avanzas.digital/index.html" target="_blank" rel="noopener">
+            ¿Quieres este sistema para tu negocio? Contáctanos
+        </a>
+    </footer>
 
     @yield('scripts')
 </body>

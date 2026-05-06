@@ -53,5 +53,16 @@
     </table>
 
     {{ $ventas->links() }}
+
+    <footer style="text-align:center;padding:16px;font-size:11px;color:#aaa;margin-top:20px;">
+    Sistema POS desarrollado por
+    <a href="https://www.avanzas.digital/index.html" target="_blank" style="color:#000;font-weight:bold;">
+        Avanzas Digital
+    </a>
+    &nbsp;·&nbsp;
+    <a href="https://www.avanzas.digital/index.html" target="_blank" style="color:#000;">
+        ¿Quieres este sistema? Contáctanos
+    </a>
+</footer>
 </body>
 </html>
