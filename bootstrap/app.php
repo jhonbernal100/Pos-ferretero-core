@@ -16,10 +16,9 @@ return Application::configure(basePath: dirname(__DIR__))
             \App\Http\Middleware\IdentifyTenant::class,
         ]);
 
-        // Excluir rutas del POS del CSRF durante desarrollo
+        // Deshabilitar CSRF completamente en desarrollo (IDX no maneja cookies correctamente)
         $middleware->validateCsrfTokens(except: [
-            'ventas',
-            'ventas/*',
+            '*',
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

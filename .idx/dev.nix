@@ -1,34 +1,24 @@
-# To learn more about how to use Nix to configure your environment
-# see: https://developers.google.com/idx/guides/customize-idx-env
 {pkgs}: {
-  # Which nixpkgs channel to use.
-  channel = "stable-24.11"; # or "unstable"
-  # Use https://search.nixos.org/packages to find packages
+  channel = "stable-24.11";
   packages = [
     pkgs.php82
     pkgs.php82Packages.composer
     pkgs.nodejs_22
     pkgs.openssh
   ];
-  # Sets environment variables in the workspace
   env = {};
   idx = {
-    # Search for the extensions you want on https://open-vsx.org/ and use "publisher.id"
     extensions = [
-      # "vscodevim.vim"
       "google.gemini-cli-vscode-ide-companion"
     ];
     workspace = {
-      # Runs when a workspace is first created with this `dev.nix` file
       onCreate = {
-        # Example: install JS dependencies from NPM
-        # npm-install = "npm install";
-        # Open editors for the following files by default, if they exist:
         default.openFiles = [ "README.md" "resources/views/welcome.blade.php" ];
       };
-      # To run something each time the workspace is (re)started, use the `onStart` hook
+      onStart = {
+        start-tunnel = "ssh -f -N -o StrictHostKeyChecking=no -L 127.0.0.1:3307:127.0.0.1:3306 -i ~/.ssh/id_rsa_pf admavanzas@server62.web-hosting.com -p 21098";
+      };
     };
-    # Enable previews and customize configuration
     previews = {
       enable = true;
       previews = {
