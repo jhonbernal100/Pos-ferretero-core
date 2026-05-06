@@ -17,6 +17,8 @@ class User extends Authenticatable implements FilamentUser
         'email',
         'password',
         'tenant_id',
+        'rol',
+        'activo',
     ];
 
     protected $hidden = [
@@ -27,12 +29,18 @@ class User extends Authenticatable implements FilamentUser
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password'          => 'hashed',
+        'activo'            => 'boolean',
     ];
 
+    // Solo superadmin accede al panel Filament
     public function canAccessPanel(Panel $panel): bool
     {
-        return true;
+        return $this->rol === 'superadmin' && $this->activo;
     }
+
+    public function esSuperAdmin(): bool { return $this->rol === 'superadmin'; }
+    public function esDueno(): bool      { return $this->rol === 'dueno'; }
+    public function esAuxiliar(): bool   { return $this->rol === 'auxiliar'; }
 
     public function tenant()
     {

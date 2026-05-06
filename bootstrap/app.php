@@ -16,9 +16,14 @@ return Application::configure(basePath: dirname(__DIR__))
             \App\Http\Middleware\IdentifyTenant::class,
         ]);
 
-        // Deshabilitar CSRF completamente en desarrollo (IDX no maneja cookies correctamente)
+        // Deshabilitar CSRF completamente en desarrollo
         $middleware->validateCsrfTokens(except: [
             '*',
+        ]);
+
+        // Alias de roles
+        $middleware->alias([
+            'rol' => \App\Http\Middleware\CheckRol::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
