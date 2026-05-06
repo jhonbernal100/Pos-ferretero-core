@@ -5,6 +5,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\VentaController;
 use App\Http\Controllers\InventarioController;
 use App\Http\Controllers\FerreteriaController;
+use App\Http\Controllers\ProveedorController;
 
 Route::get('/', fn() => redirect('/login'));
 
@@ -34,6 +35,12 @@ Route::middleware('auth')->group(function () {
         Route::get('/perfil',    [FerreteriaController::class, 'perfil'])->name('ferreteria.perfil');
         Route::post('/perfil',   [FerreteriaController::class, 'actualizarPerfil'])->name('ferreteria.actualizar');
         Route::get('/suscripcion', [FerreteriaController::class, 'suscripcion'])->name('ferreteria.suscripcion');
+    });
+
+    Route::prefix('proveedores')->group(function () {
+        Route::get('/',       [ProveedorController::class, 'index'])->name('proveedores.index');
+        Route::get('/crear',  [ProveedorController::class, 'crear'])->name('proveedores.crear');
+        Route::post('/',      [ProveedorController::class, 'store'])->name('proveedores.store');
     });
 
 });
