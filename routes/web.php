@@ -4,16 +4,16 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\VentaController;
 use App\Http\Controllers\InventarioController;
+use App\Http\Controllers\FerreteriaController;
 
 Route::get('/', fn() => redirect('/login'));
 
-// Autenticación
-Route::get('/login',  [AuthController::class, 'showLogin'])->name('login');
-Route::post('/login', [AuthController::class, 'login']);
+Route::get('/login',   [AuthController::class, 'showLogin'])->name('login');
+Route::post('/login',  [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-// Rutas protegidas
 Route::middleware('auth')->group(function () {
+
     Route::prefix('ventas')->group(function () {
         Route::get('/',                [VentaController::class, 'index'])->name('ventas.index');
         Route::get('/crear',           [VentaController::class, 'crear'])->name('ventas.crear');
@@ -29,4 +29,11 @@ Route::middleware('auth')->group(function () {
         Route::post('/guardar',  [InventarioController::class, 'guardar'])->name('inventario.guardar');
         Route::post('/{producto}/actualizar', [InventarioController::class, 'actualizar'])->name('inventario.actualizar');
     });
+
+    Route::prefix('ferreteria')->group(function () {
+        Route::get('/perfil',    [FerreteriaController::class, 'perfil'])->name('ferreteria.perfil');
+        Route::post('/perfil',   [FerreteriaController::class, 'actualizarPerfil'])->name('ferreteria.actualizar');
+        Route::get('/suscripcion', [FerreteriaController::class, 'suscripcion'])->name('ferreteria.suscripcion');
+    });
+
 });
