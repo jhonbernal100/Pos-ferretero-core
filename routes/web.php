@@ -33,22 +33,25 @@ Route::middleware('auth')->group(function () {
     });
 
     Route::prefix('ferreteria')->group(function () {
-        Route::get('/perfil',    [FerreteriaController::class, 'perfil'])->name('ferreteria.perfil');
-        Route::post('/perfil',   [FerreteriaController::class, 'actualizarPerfil'])->name('ferreteria.actualizar');
+        Route::get('/perfil',      [FerreteriaController::class, 'perfil'])->name('ferreteria.perfil');
+        Route::post('/perfil',     [FerreteriaController::class, 'actualizarPerfil'])->name('ferreteria.actualizar');
         Route::get('/suscripcion', [FerreteriaController::class, 'suscripcion'])->name('ferreteria.suscripcion');
     });
 
     Route::prefix('proveedores')->group(function () {
-        Route::get('/',       [ProveedorController::class, 'index'])->name('proveedores.index');
-        Route::get('/crear',  [ProveedorController::class, 'crear'])->name('proveedores.crear');
-        Route::post('/',      [ProveedorController::class, 'store'])->name('proveedores.store');
+        Route::get('/',      [ProveedorController::class, 'index'])->name('proveedores.index');
+        Route::get('/crear', [ProveedorController::class, 'crear'])->name('proveedores.crear');
+        Route::post('/',     [ProveedorController::class, 'store'])->name('proveedores.store');
     });
 
     Route::prefix('clientes')->group(function () {
-        Route::get('/',                        [ClienteController::class, 'index'])->name('clientes.index');
-        Route::get('/crear',                   [ClienteController::class, 'crear'])->name('clientes.crear');
-        Route::post('/',                       [ClienteController::class, 'store'])->name('clientes.store');
-        Route::get('/{cliente}/creditos',      [ClienteController::class, 'creditos'])->name('clientes.creditos');
-        Route::post('/{cliente}/creditos',     [ClienteController::class, 'guardarCredito'])->name('clientes.guardarCredito');
+        Route::get('/',                         [ClienteController::class, 'index'])->name('clientes.index');
+        Route::get('/crear',                    [ClienteController::class, 'crear'])->name('clientes.crear');
+        Route::post('/',                        [ClienteController::class, 'store'])->name('clientes.store');
+        Route::get('/{cliente}/creditos',       [ClienteController::class, 'creditos'])->name('clientes.creditos');
+        Route::post('/{cliente}/creditos',      [ClienteController::class, 'guardarCredito'])->name('clientes.guardarCredito');
+        Route::get('/{cliente}/historial',      [ClienteController::class, 'historialCredito'])->name('clientes.historial');
+        Route::post('/{cliente}/pagar-credito', [ClienteController::class, 'pagarCredito'])->name('clientes.pagarCredito');
     });
+
 });
