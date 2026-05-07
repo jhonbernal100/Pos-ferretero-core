@@ -103,6 +103,11 @@
             🛒 Nueva venta
         </a>
 
+        <a href="/ventas"
+               class="{{ request()->is('ventas') && !request()->is('ventas/crear') ? 'activo' : '' }}">
+                📋 Ventas
+            </a>
+
         <a href="/inventario/capturar"
            class="{{ request()->is('inventario/capturar') ? 'activo' : '' }}">
             📷 Agregar inventario
