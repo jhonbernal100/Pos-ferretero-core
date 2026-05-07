@@ -97,28 +97,24 @@
 
     <div class="toolbar">
 
-        {{-- Menú común para todos los roles --}}
+        {{-- Común para todos los roles --}}
         <a href="/ventas/crear"
            class="{{ request()->is('ventas/crear') ? 'activo' : '' }}">
             🛒 Nueva venta
         </a>
 
         <a href="/ventas"
-               class="{{ request()->is('ventas') && !request()->is('ventas/crear') ? 'activo' : '' }}">
-                📋 Ventas
-            </a>
+           class="{{ request()->is('ventas') && !request()->is('ventas/crear') ? 'activo' : '' }}">
+            📋 Ventas
+        </a>
 
         <a href="/inventario/capturar"
            class="{{ request()->is('inventario/capturar') ? 'activo' : '' }}">
             📷 Agregar inventario
         </a>
 
-        {{-- Menú exclusivo para dueño y superadmin --}}
+        {{-- Solo dueño y superadmin --}}
         @if(auth()->user()->rol === 'dueno' || auth()->user()->rol === 'superadmin')
-            <a href="/ventas"
-               class="{{ request()->is('ventas') && !request()->is('ventas/crear') ? 'activo' : '' }}">
-                📋 Ventas
-            </a>
             <a href="/inventario"
                class="{{ request()->is('inventario') && !request()->is('inventario/capturar') ? 'activo' : '' }}">
                 📦 Inventario
