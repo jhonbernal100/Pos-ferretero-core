@@ -22,6 +22,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/',               [VentaController::class, 'store'])->name('ventas.store');
         Route::get('/{venta}/ticket',  [VentaController::class, 'ticket'])->name('ventas.ticket');
         Route::post('/{venta}/anular', [VentaController::class, 'anular'])->name('ventas.anular');
+        Route::get('/{venta}/ticket-abono', [VentaController::class, 'ticketAbono'])->name('ventas.ticketAbono');
     });
 
     Route::prefix('inventario')->group(function () {

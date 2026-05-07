@@ -98,43 +98,62 @@ class ClienteController extends Controller
     }
 
     public function pagarCredito(Request $request, Cliente $cliente)
-    {
-        $request->validate([
-            'monto_pagado' => 'required|integer|min:1',
-        ]);
+{
+    $request->validate([
+        'monto_pagado' => 'required|integer|min:1',
+    ]);
 
-        $credito = Credito::where('cliente_id', $cliente->id)
-            ->where('tenant_id', session('tenant_id'))
-            ->firstOrFail();
+    $credito = Credito::where('cliente_id', $cliente->id)
+        ->where('tenant_id', session('tenant_id'))
+        ->firstOrFail();
 
-        $montoPagado = $request->monto_pagado;
+    $montoPagado = $request->monto_pagado;
 
-        if ($montoPagado > $credito->saldo_usado) {
-            return response()->json([
-                'success' => false,
-                'mensaje' => 'El monto pagado no puede ser mayor al saldo usado',
-            ], 422);
-        }
-
-        $credito->decrement('saldo_usado', $montoPagado);
-
-        if ($credito->fresh()->saldo_usado <= 0) {
-            $credito->update([
-                'estado'      => 'pagado',
-                'saldo_usado' => 0,
-            ]);
-
-            Venta::where('cliente_id', $cliente->id)
-                ->where('tenant_id', session('tenant_id'))
-                ->where('metodo_pago', 'credito')
-                ->where('credito_pagado', false)
-                ->update(['credito_pagado' => true]);
-        }
-
+    if ($montoPagado > $credito->saldo_usado) {
         return response()->json([
-            'success'        => true,
-            'mensaje'        => 'Pago registrado correctamente',
-            'saldo_restante' => $credito->fresh()->saldo_usado,
-        ]);
+            'success' => false,
+            'mensaje' => 'El monto pagado no puede ser mayor al saldo usado',
+        ], 422);
     }
+
+    // Crear registro de abono en ventas
+    $abono = \App\Models\Venta::create([
+        'tenant_id'      => session('tenant_id'),
+        'cliente_id'     => $cliente->id,
+        'tipo_documento' => 'abono_credito',
+        'estado'         => 'completada',
+        'subtotal'       => $montoPagado,
+        'descuento'      => 0,
+        'total'          => $montoPagado,
+        'metodo_pago'    => $request->metodo_pago ?? 'efectivo',
+        'monto_pagado'   => $montoPagado,
+        'cambio'         => 0,
+        'credito_pagado' => true,
+        'notas'          => 'Abono a crédito — ' . $cliente->nombre,
+    ]);
+
+    // Reducir saldo del crédito
+    $credito->decrement('saldo_usado', $montoPagado);
+
+    // Si saldo queda en 0 marcar como pagado
+    if ($credito->fresh()->saldo_usado <= 0) {
+        $credito->update([
+            'estado'      => 'pagado',
+            'saldo_usado' => 0,
+        ]);
+
+        Venta::where('cliente_id', $cliente->id)
+            ->where('tenant_id', session('tenant_id'))
+            ->where('metodo_pago', 'credito')
+            ->where('credito_pagado', false)
+            ->update(['credito_pagado' => true]);
+    }
+
+    return response()->json([
+        'success'        => true,
+        'mensaje'        => 'Pago registrado correctamente',
+        'abono_id'       => $abono->id,
+        'saldo_restante' => $credito->fresh()->saldo_usado,
+    ]);
+}
 }

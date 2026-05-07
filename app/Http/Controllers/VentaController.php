@@ -168,6 +168,16 @@ class VentaController extends Controller
         return view('ventas.ticket', compact('venta'));
     }
 
+    public function ticketAbono(Venta $venta)
+    {
+    $venta->load('cliente', 'tenant');
+    $credito = \App\Models\Credito::where('cliente_id', $venta->cliente_id)
+        ->where('tenant_id', $venta->tenant_id)
+        ->first();
+    $saldo_anterior = $credito ? $credito->saldo_usado + $venta->total : $venta->total;
+    return view('ventas.ticket-abono', compact('venta', 'credito', 'saldo_anterior'));
+    }
+
     public function anular(Venta $venta)
     {
         if ($venta->estado === 'anulada') {

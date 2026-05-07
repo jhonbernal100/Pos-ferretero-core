@@ -173,8 +173,9 @@ async function registrarPago() {
     msg.textContent      = data.mensaje;
 
     if (data.success) {
-        setTimeout(() => window.location.reload(), 1500);
-    }
+    window.open(`/ventas/${data.abono_id}/ticket-abono`, '_blank');
+    setTimeout(() => window.location.reload(), 1500);
+        }
 }
 </script>
 @endsection
