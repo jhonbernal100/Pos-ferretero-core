@@ -33,6 +33,7 @@
             gap: 8px;
             overflow-x: auto;
             scrollbar-width: none;
+            -webkit-overflow-scrolling: touch;
         }
 
         .toolbar::-webkit-scrollbar { display: none; }
@@ -40,13 +41,14 @@
         .toolbar a {
             color: #fff;
             text-decoration: none;
-            padding: 8px 14px;
+            padding: 10px 16px;
             border-radius: 6px;
-            font-size: 13px;
+            font-size: 14px;
             white-space: nowrap;
             background: #222;
             border: 1px solid #333;
             transition: background .2s;
+            flex-shrink: 0;
         }
 
         .toolbar a:hover { background: #333; }
@@ -94,39 +96,35 @@
     </nav>
 
     <div class="toolbar">
+
+        {{-- Menú común para todos los roles --}}
         <a href="/ventas/crear"
            class="{{ request()->is('ventas/crear') ? 'activo' : '' }}">
             🛒 Nueva venta
         </a>
 
+        <a href="/inventario/capturar"
+           class="{{ request()->is('inventario/capturar') ? 'activo' : '' }}">
+            📷 Agregar inventario
+        </a>
+
+        {{-- Menú exclusivo para dueño y superadmin --}}
         @if(auth()->user()->rol === 'dueno' || auth()->user()->rol === 'superadmin')
             <a href="/ventas"
-               class="{{ request()->is('ventas') ? 'activo' : '' }}">
+               class="{{ request()->is('ventas') && !request()->is('ventas/crear') ? 'activo' : '' }}">
                 📋 Ventas
             </a>
             <a href="/inventario"
-               class="{{ request()->is('inventario') ? 'activo' : '' }}">
+               class="{{ request()->is('inventario') && !request()->is('inventario/capturar') ? 'activo' : '' }}">
                 📦 Inventario
-            </a>
-        @endif
-
-        <a href="/inventario/capturar"
-           class="{{ request()->is('inventario/capturar') ? 'activo' : '' }}">
-            📷 Tomar foto
-        </a>
-
-        @if(auth()->user()->rol === 'dueno' || auth()->user()->rol === 'superadmin')
-            <a href="/proveedores"
-               class="{{ request()->is('proveedores*') ? 'activo' : '' }}">
-                🚚 Proveedores
             </a>
             <a href="/clientes"
                class="{{ request()->is('clientes*') ? 'activo' : '' }}">
                 👥 Clientes
             </a>
-            <a href="/creditos"
-               class="{{ request()->is('creditos*') ? 'activo' : '' }}">
-                💳 Créditos
+            <a href="/proveedores"
+               class="{{ request()->is('proveedores*') ? 'activo' : '' }}">
+                🚚 Proveedores
             </a>
             <a href="/ferreteria/perfil"
                class="{{ request()->is('ferreteria/perfil') ? 'activo' : '' }}">
@@ -138,10 +136,10 @@
             </a>
         @endif
 
-        <form method="POST" action="/logout" style="margin-left:auto">
+        <form method="POST" action="/logout" style="margin-left:auto;flex-shrink:0;">
             @csrf
             <button type="submit"
-                style="background:#c00;color:#fff;border:none;padding:8px 14px;border-radius:6px;font-size:13px;cursor:pointer;white-space:nowrap;">
+                style="background:#c00;color:#fff;border:none;padding:10px 16px;border-radius:6px;font-size:14px;cursor:pointer;white-space:nowrap;">
                 🚪 Salir
             </button>
         </form>

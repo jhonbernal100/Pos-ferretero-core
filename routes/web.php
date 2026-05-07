@@ -6,6 +6,7 @@ use App\Http\Controllers\VentaController;
 use App\Http\Controllers\InventarioController;
 use App\Http\Controllers\FerreteriaController;
 use App\Http\Controllers\ProveedorController;
+use App\Http\Controllers\ClienteController;
 
 Route::get('/', fn() => redirect('/login'));
 
@@ -43,4 +44,11 @@ Route::middleware('auth')->group(function () {
         Route::post('/',      [ProveedorController::class, 'store'])->name('proveedores.store');
     });
 
+    Route::prefix('clientes')->group(function () {
+        Route::get('/',                        [ClienteController::class, 'index'])->name('clientes.index');
+        Route::get('/crear',                   [ClienteController::class, 'crear'])->name('clientes.crear');
+        Route::post('/',                       [ClienteController::class, 'store'])->name('clientes.store');
+        Route::get('/{cliente}/creditos',      [ClienteController::class, 'creditos'])->name('clientes.creditos');
+        Route::post('/{cliente}/creditos',     [ClienteController::class, 'guardarCredito'])->name('clientes.guardarCredito');
+    });
 });
