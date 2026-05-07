@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Cliente;
 use App\Models\Credito;
+use App\Models\Venta;
 use Illuminate\Http\Request;
 
 class ClienteController extends Controller
@@ -77,6 +78,63 @@ class ClienteController extends Controller
         return response()->json([
             'success' => true,
             'mensaje' => 'Crédito actualizado correctamente',
+        ]);
+    }
+
+    public function historialCredito(Cliente $cliente)
+    {
+        $credito = Credito::where('cliente_id', $cliente->id)
+            ->where('tenant_id', session('tenant_id'))
+            ->first();
+
+        $ventas = Venta::with('detalles')
+            ->where('cliente_id', $cliente->id)
+            ->where('metodo_pago', 'credito')
+            ->where('estado', 'completada')
+            ->orderByDesc('created_at')
+            ->get();
+
+        return view('clientes.historial', compact('cliente', 'credito', 'ventas'));
+    }
+
+    public function pagarCredito(Request $request, Cliente $cliente)
+    {
+        $request->validate([
+            'monto_pagado' => 'required|integer|min:1',
+        ]);
+
+        $credito = Credito::where('cliente_id', $cliente->id)
+            ->where('tenant_id', session('tenant_id'))
+            ->firstOrFail();
+
+        $montoPagado = $request->monto_pagado;
+
+        if ($montoPagado > $credito->saldo_usado) {
+            return response()->json([
+                'success' => false,
+                'mensaje' => 'El monto pagado no puede ser mayor al saldo usado',
+            ], 422);
+        }
+
+        $credito->decrement('saldo_usado', $montoPagado);
+
+        if ($credito->fresh()->saldo_usado <= 0) {
+            $credito->update([
+                'estado'      => 'pagado',
+                'saldo_usado' => 0,
+            ]);
+
+            Venta::where('cliente_id', $cliente->id)
+                ->where('tenant_id', session('tenant_id'))
+                ->where('metodo_pago', 'credito')
+                ->where('credito_pagado', false)
+                ->update(['credito_pagado' => true]);
+        }
+
+        return response()->json([
+            'success'        => true,
+            'mensaje'        => 'Pago registrado correctamente',
+            'saldo_restante' => $credito->fresh()->saldo_usado,
         ]);
     }
 }
