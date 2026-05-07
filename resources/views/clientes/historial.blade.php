@@ -1,7 +1,4 @@
-Falta el archivo historial.blade.php. Créalo en IDX:
-bashtouch resources/views/clientes/historial.blade.php
-Luego abre el archivo y pega el contenido completo que te di anteriormente. Lo repito aquí para que lo copies directamente:
-html@extends('layouts.pos')
+@extends('layouts.pos')
 
 @section('titulo', 'Historial de crédito')
 
