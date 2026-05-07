@@ -131,11 +131,16 @@
         @if($ventas->count() > 0)
         <div style="padding:16px;text-align:right;border-top:2px solid #000;">
             <div style="font-size:13px;color:#555;margin-bottom:4px;">
-                Pendiente: $ {{ number_format($ventas->where('credito_pagado', false)->sum('total'), 0, ',', '.') }}
+                Total acumulado en crédito: $ {{ number_format($ventas->sum('total'), 0, ',', '.') }}
             </div>
-            <div style="font-size:16px;font-weight:bold;">
-                Total acumulado: $ {{ number_format($ventas->sum('total'), 0, ',', '.') }}
+            @if($credito)
+            <div style="font-size:13px;color:#721c24;margin-bottom:4px;">
+                Saldo pendiente por pagar: $ {{ number_format($credito->saldo_usado, 0, ',', '.') }}
             </div>
+            <div style="font-size:16px;font-weight:bold;color:#155724;">
+                Disponible para comprar: $ {{ number_format($credito->saldoDisponible(), 0, ',', '.') }}
+            </div>
+            @endif
         </div>
         @endif
     </div>
