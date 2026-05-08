@@ -254,22 +254,11 @@
     <!-- Panel izquierdo — Login -->
     <div class="panel-login">
 
-        <!-- Logo Avanzas Digital -->
+        <!-- Logo real -->
         <div class="logo-container">
-            <svg width="180" height="60" viewBox="0 0 180 60" xmlns="http://www.w3.org/2000/svg">
-                <!-- A -->
-                <text x="0" y="42" font-family="Arial Black, Arial" font-weight="900"
-                      font-size="40" fill="#99CF8E">A</text>
-                <!-- vanzas -->
-                <text x="28" y="42" font-family="Arial, sans-serif" font-weight="400"
-                      font-size="34" fill="#2d2d2d">vanz</text>
-                <!-- as con color -->
-                <text x="102" y="42" font-family="Arial Black, Arial" font-weight="900"
-                      font-size="34" fill="#CEC8BF">as</text>
-                <!-- Digital -->
-                <text x="2" y="57" font-family="Arial, sans-serif" font-weight="300"
-                      font-size="13" fill="#CEC8BF" letter-spacing="4">Digit@l</text>
-            </svg>
+            <img src="/images/logo-pos-ferretero.png" 
+            alt="POS Ferretero" 
+            style="width:260px; max-width:100%;">
         </div>
 
         <div class="pos-titulo">🔧 POS Ferretero</div>
