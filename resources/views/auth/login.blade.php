@@ -59,11 +59,15 @@
             text-align: center;
         }
 
-        .version {
+        .version-badge {
+            display: inline-block;
+            background: #f0f0f0;
+            color: #CEC8BF;
             font-size: 11px;
-            color: #aaa;
-            text-align: center;
-            margin-bottom: 8px;
+            padding: 3px 12px;
+            border-radius: 12px;
+            margin-bottom: 6px;
+            letter-spacing: 1px;
         }
 
         .slogan {
