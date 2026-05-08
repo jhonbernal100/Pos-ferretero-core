@@ -262,7 +262,16 @@
         </div>
 
         <div class="pos-titulo">🔧 POS Ferretero</div>
-        <div class="version">v1.0.{{ str_pad(0, 3, '0', STR_PAD_LEFT) }} — 2026</div>
+        
+        @php
+            $commits = (int) trim(shell_exec('git rev-list --count HEAD') ?? 0);
+            $major = 1;
+            $minor = floor($commits / 100);
+            $patch = str_pad($commits % 100, 3, '0', STR_PAD_LEFT);
+        @endphp
+        <div class="version-badge">v {{ $major }}.{{ $minor }}.{{ $patch }} · {{ date('Y') }}</div>
+
+
         <div class="slogan">Tu éxito es nuestro objetivo</div>
 
         <div class="divider"></div>
