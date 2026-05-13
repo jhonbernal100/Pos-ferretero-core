@@ -31,6 +31,9 @@ Route::middleware('auth')->group(function () {
         Route::post('/analizar', [InventarioController::class, 'analizar'])->name('inventario.analizar');
         Route::post('/guardar',  [InventarioController::class, 'guardar'])->name('inventario.guardar');
         Route::post('/{producto}/actualizar', [InventarioController::class, 'actualizar'])->name('inventario.actualizar');
+        Route::get('/crear-manual',              [InventarioController::class, 'crear'])->name('inventario.crear');
+        Route::get('/{producto}/editar',         [InventarioController::class, 'editar'])->name('inventario.editar');
+        Route::post('/{producto}/actualizar-producto', [InventarioController::class, 'actualizar_producto'])->name('inventario.actualizarProducto');
     });
 
     Route::prefix('ferreteria')->group(function () {

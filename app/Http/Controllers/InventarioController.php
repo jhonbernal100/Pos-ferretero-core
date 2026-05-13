@@ -130,42 +130,52 @@ Devuélveme ÚNICAMENTE un JSON válido con esta estructura, sin texto adicional
     }
 
     public function guardar(Request $request)
-    {
-        $request->validate([
-            'nombre'        => 'required|string|max:191',
-            'precio_compra' => 'required|integer|min:0',
-            'precio_venta'  => 'required|integer|min:0',
-            'stock'         => 'required|integer|min:0',
-        ]);
+{
+    $request->validate([
+        'nombre'        => 'required|string|max:191',
+        'precio_compra' => 'required|integer|min:0',
+        'precio_venta'  => 'required|integer|min:0',
+        'stock'         => 'required|integer|min:0',
+    ]);
 
-        $producto = Producto::updateOrCreate(
-            [
-                'tenant_id'  => session('tenant_id'),
-                'referencia' => $request->referencia,
-            ],
-            [
-                'tenant_id'     => session('tenant_id'),
-                'nombre'        => $request->nombre,
-                'marca'         => $request->marca,
-                'categoria'     => $request->categoria,
-                'unidad'        => $request->unidad ?? 'unidad',
-                'referencia'    => $request->referencia,
-                'precio_compra' => $request->precio_compra,
-                'precio_venta'  => $request->precio_venta,
-                'stock'         => $request->stock,
-                'stock_minimo'  => $request->stock_minimo ?? 5,
-                'activo'        => true,
-            ]
-        );
-
-        return response()->json([
-            'success'  => true,
-            'producto' => $producto,
-            'mensaje'  => $producto->wasRecentlyCreated
-                ? 'Producto agregado al inventario'
-                : 'Inventario actualizado',
-        ]);
+    // Guardar foto en storage
+    $foto = null;
+    if ($request->foto_base64) {
+        $imagen = base64_decode($request->foto_base64);
+        $nombre = 'productos/' . uniqid() . '.jpg';
+        \Storage::disk('public')->put($nombre, $imagen);
+        $foto = $nombre;
     }
+
+    $producto = Producto::updateOrCreate(
+        [
+            'tenant_id'  => session('tenant_id'),
+            'referencia' => $request->referencia,
+        ],
+        [
+            'tenant_id'     => session('tenant_id'),
+            'nombre'        => $request->nombre,
+            'marca'         => $request->marca,
+            'categoria'     => $request->categoria,
+            'unidad'        => $request->unidad ?? 'unidad',
+            'referencia'    => $request->referencia,
+            'precio_compra' => $request->precio_compra,
+            'precio_venta'  => $request->precio_venta,
+            'stock'         => $request->stock,
+            'stock_minimo'  => $request->stock_minimo ?? 5,
+            'foto'          => $foto,
+            'activo'        => true,
+        ]
+    );
+
+    return response()->json([
+        'success'  => true,
+        'producto' => $producto,
+        'mensaje'  => $producto->wasRecentlyCreated
+            ? 'Producto agregado al inventario'
+            : 'Inventario actualizado',
+    ]);
+}
 
     public function actualizar(Request $request, Producto $producto)
     {
@@ -180,4 +190,65 @@ Devuélveme ÚNICAMENTE un JSON válido con esta estructura, sin texto adicional
             'mensaje' => "Stock actualizado. Total: {$producto->fresh()->stock} unidades",
         ]);
     }
+
+    public function crear()
+    {
+        $proveedores = Proveedor::where('activo', true)
+            ->orderBy('nombre')
+            ->get();
+    
+        return view('inventario.crear-manual', compact('proveedores'));
+    }
+    
+    public function editar(Producto $producto)
+    {
+        $proveedores = Proveedor::where('activo', true)
+            ->orderBy('nombre')
+            ->get();
+    
+        return view('inventario.editar', compact('producto', 'proveedores'));
+    }
+      
+    public function actualizar_producto(Request $request, Producto $producto)
+{
+    $request->validate([
+        'nombre'        => 'required|string|max:191',
+        'precio_compra' => 'required|integer|min:0',
+        'precio_venta'  => 'required|integer|min:0',
+        'stock'         => 'required|integer|min:0',
+    ]);
+
+    // Guardar foto si viene nueva
+    $foto = $producto->foto;
+    if ($request->hasFile('foto')) {
+        $foto = $request->file('foto')->store('productos', 'public');
+    } elseif ($request->foto_base64) {
+        $imagen = base64_decode($request->foto_base64);
+        $nombre = 'productos/' . uniqid() . '.jpg';
+        \Storage::disk('public')->put($nombre, $imagen);
+        $foto = $nombre;
+    }
+
+    $producto->update([
+        'nombre'        => $request->nombre,
+        'marca'         => $request->marca,
+        'categoria'     => $request->categoria,
+        'unidad'        => $request->unidad ?? 'unidad',
+        'referencia'    => $request->referencia,
+        'precio_compra' => $request->precio_compra,
+        'precio_venta'  => $request->precio_venta,
+        'stock'         => $request->stock,
+        'stock_minimo'  => $request->stock_minimo ?? 5,
+        'descripcion'   => $request->descripcion,
+        'foto'          => $foto,
+        'activo'        => true,
+    ]);
+
+    return response()->json([
+        'success' => true,
+        'mensaje' => 'Producto actualizado correctamente',
+    ]);
+}
+
+
 }

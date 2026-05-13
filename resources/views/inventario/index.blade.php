@@ -4,12 +4,18 @@
 
 @section('contenido')
 <div style="padding:16px;max-width:1200px;margin:0 auto;">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px;">
         <h1 style="font-size:22px;">📦 Inventario</h1>
-        <a href="/inventario/capturar"
-           style="padding:10px 20px;background:#000;color:#fff;border-radius:8px;text-decoration:none;font-size:14px;">
-            📷 Agregar producto
-        </a>
+        <div style="display:flex;gap:8px;">
+            <a href="/inventario/crear-manual"
+               style="padding:10px 16px;background:#fff;color:#000;border:2px solid #000;border-radius:8px;text-decoration:none;font-size:14px;font-weight:bold;">
+                ➕ Crear manual
+            </a>
+            <a href="/inventario/capturar"
+               style="padding:10px 16px;background:#000;color:#fff;border-radius:8px;text-decoration:none;font-size:14px;font-weight:bold;">
+                📷 Capturar con foto
+            </a>
+        </div>
     </div>
 
     <div style="margin-bottom:12px;">
@@ -21,17 +27,28 @@
         <table style="width:100%;border-collapse:collapse;">
             <thead>
                 <tr style="background:#000;color:#fff;">
+                    <th style="padding:12px;text-align:left;font-size:13px;width:60px;">Foto</th>
                     <th style="padding:12px;text-align:left;font-size:13px;">Producto</th>
                     <th style="padding:12px;text-align:left;font-size:13px;">Categoría</th>
                     <th style="padding:12px;text-align:left;font-size:13px;">Precio venta</th>
                     <th style="padding:12px;text-align:center;font-size:13px;">Stock</th>
-                    <th style="padding:12px;text-align:left;font-size:13px;">Estado</th>
+                    <th style="padding:12px;text-align:center;font-size:13px;">Acciones</th>
                 </tr>
             </thead>
             <tbody id="tabla-productos">
                 @forelse($productos as $producto)
                 <tr style="border-bottom:1px solid #eee;" class="fila-producto"
                     data-nombre="{{ strtolower($producto->nombre) }}">
+                    <td style="padding:8px;">
+                        @if($producto->foto)
+                        <img src="{{ asset('storage/' . $producto->foto) }}"
+                             style="width:48px;height:48px;object-fit:cover;border-radius:6px;border:1px solid #eee;">
+                        @else
+                        <div style="width:48px;height:48px;background:#f5f5f5;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:20px;">
+                            🔩
+                        </div>
+                        @endif
+                    </td>
                     <td style="padding:12px;">
                         <div style="font-size:14px;font-weight:bold;">{{ $producto->nombre }}</div>
                         @if($producto->marca)
@@ -49,20 +66,20 @@
                             {{ $producto->stock }}
                         </span>
                     </td>
-                    <td style="padding:12px;font-size:12px;">
-                        @if($producto->stock <= 0)
-                            <span style="color:#721c24;font-weight:bold;">⛔ Sin stock</span>
-                        @elseif($producto->stock <= $producto->stock_minimo)
-                            <span style="color:#856404;font-weight:bold;">⚠️ Stock bajo</span>
-                        @else
-                            <span style="color:#155724;">✅ OK</span>
-                        @endif
+                    <td style="padding:12px;text-align:center;">
+                        <a href="/inventario/{{ $producto->id }}/editar"
+                           style="padding:6px 14px;background:#000;color:#fff;border-radius:6px;font-size:12px;text-decoration:none;">
+                            ✏️ Editar
+                        </a>
                     </td>
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="5" style="padding:24px;text-align:center;color:#999;">
-                        No hay productos. <a href="/inventario/capturar" style="color:#000;">Agrega el primero</a>
+                    <td colspan="6" style="padding:24px;text-align:center;color:#999;">
+                        No hay productos.
+                        <a href="/inventario/crear-manual" style="color:#000;">Crea el primero manualmente</a>
+                        o
+                        <a href="/inventario/capturar" style="color:#000;">captura con foto</a>
                     </td>
                 </tr>
                 @endforelse

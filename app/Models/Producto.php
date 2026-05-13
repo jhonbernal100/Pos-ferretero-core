@@ -11,6 +11,7 @@ class Producto extends Model
         'tenant_id', 'nombre', 'referencia', 'marca',
         'categoria', 'unidad', 'precio_compra', 'precio_venta',
         'stock', 'stock_minimo', 'codigo_barras', 'descripcion', 'activo',
+        'foto', 'activo',
     ];
 
     protected $casts = [
