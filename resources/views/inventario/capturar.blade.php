@@ -271,6 +271,7 @@
 </div>
 
 <script>
+let fotoBase64 = null;   
 let productoExistenteId = null;
 
 async function procesarFoto(input) {
@@ -287,6 +288,7 @@ async function procesarFoto(input) {
 
     // Convertir a base64
     const base64 = await fileToBase64(file);
+    fotoBase64 = base64; // ← esta línea debe estar
 
     // Mostrar estado procesando
     mostrarEstado('procesando');
@@ -383,6 +385,7 @@ async function guardarProducto() {
         precio_venta:  parseInt(document.getElementById('f-precio-venta').value) || 0,
         stock:         parseInt(document.getElementById('f-stock').value) || 0,
         stock_minimo:  parseInt(document.getElementById('f-stock-minimo').value) || 5,
+        foto_base64:   fotoBase64,
     };
 
     if (!payload.nombre) { alert('El nombre del producto es obligatorio'); return; }
