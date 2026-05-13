@@ -27,7 +27,7 @@
         <table style="width:100%;border-collapse:collapse;">
             <thead>
                 <tr style="background:#000;color:#fff;">
-                    <th style="padding:12px;text-align:left;font-size:13px;width:60px;">Foto</th>
+                    <th style="padding:12px;text-align:left;font-size:13px;width:70px;">Foto</th>
                     <th style="padding:12px;text-align:left;font-size:13px;">Producto</th>
                     <th style="padding:12px;text-align:left;font-size:13px;">Categoría</th>
                     <th style="padding:12px;text-align:left;font-size:13px;">Precio venta</th>
@@ -42,9 +42,11 @@
                     <td style="padding:8px;">
                         @if($producto->foto)
                         <img src="{{ asset('storage/' . $producto->foto) }}"
-                             style="width:48px;height:48px;object-fit:cover;border-radius:6px;border:1px solid #eee;">
+                             onclick="verFoto('{{ asset('storage/' . $producto->foto) }}', '{{ $producto->nombre }}')"
+                             style="width:52px;height:52px;object-fit:cover;border-radius:6px;border:1px solid #eee;cursor:pointer;"
+                             title="Click para ampliar">
                         @else
-                        <div style="width:48px;height:48px;background:#f5f5f5;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:20px;">
+                        <div style="width:52px;height:52px;background:#f5f5f5;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:24px;">
                             🔩
                         </div>
                         @endif
@@ -88,6 +90,16 @@
     </div>
 </div>
 
+{{-- Modal foto ampliada --}}
+<div id="modal-foto" onclick="cerrarModal()"
+     style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:9999;align-items:center;justify-content:center;flex-direction:column;">
+    <img id="modal-img" src="" alt=""
+         style="max-width:90%;max-height:80vh;object-fit:contain;border-radius:12px;box-shadow:0 8px 40px rgba(0,0,0,0.5);">
+    <div id="modal-nombre"
+         style="color:#fff;font-size:16px;margin-top:16px;font-weight:bold;"></div>
+    <div style="color:#aaa;font-size:13px;margin-top:8px;">Toca para cerrar</div>
+</div>
+
 <script>
 document.getElementById('buscador').addEventListener('input', function() {
     const q = this.value.toLowerCase();
@@ -95,5 +107,16 @@ document.getElementById('buscador').addEventListener('input', function() {
         fila.style.display = fila.dataset.nombre.includes(q) ? '' : 'none';
     });
 });
+
+function verFoto(url, nombre) {
+    const modal = document.getElementById('modal-foto');
+    document.getElementById('modal-img').src = url;
+    document.getElementById('modal-nombre').textContent = nombre;
+    modal.style.display = 'flex';
+}
+
+function cerrarModal() {
+    document.getElementById('modal-foto').style.display = 'none';
+}
 </script>
 @endsection

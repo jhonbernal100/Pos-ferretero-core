@@ -53,20 +53,30 @@
         <input type="text" class="buscador" id="buscador"
                placeholder="Buscar producto..." autofocus>
         <div class="grid-productos" id="grid-productos">
-            @foreach($productos as $producto)
-            <div class="producto-card {{ $producto->stock <= 0 ? 'sin-stock' : '' }}"
-                 data-id="{{ $producto->id }}"
-                 data-nombre="{{ $producto->nombre }}"
-                 data-precio="{{ $producto->precio_venta }}"
-                 data-stock="{{ $producto->stock }}"
-                 onclick="agregarAlCarrito(this)">
-                <div class="nombre">{{ $producto->nombre }}</div>
-                <div class="precio">$ {{ number_format($producto->precio_venta, 0, ',', '.') }}</div>
-                <div class="stock {{ $producto->stock > $producto->stock_minimo ? 'stock-ok' : ($producto->stock > 0 ? 'stock-bajo' : 'stock-cero') }}">
-                    {{ $producto->stock > 0 ? 'Stock: ' . $producto->stock : 'Sin stock' }}
-                </div>
+        @foreach($productos as $producto)
+        <div class="producto-card {{ $producto->stock <= 0 ? 'sin-stock' : '' }}"
+        data-id="{{ $producto->id }}"
+        data-nombre="{{ $producto->nombre }}"
+        data-precio="{{ $producto->precio_venta }}"
+        data-stock="{{ $producto->stock }}"
+        onclick="agregarAlCarrito(this)">
+        @if($producto->foto)
+            <div style="width:100%;height:80px;margin-bottom:8px;border-radius:6px;overflow:hidden;background:#f5f5f5;">
+            <img src="{{ asset('storage/' . $producto->foto) }}"
+             style="width:100%;height:100%;object-fit:cover;">
             </div>
-            @endforeach
+    @else
+    <div style="width:100%;height:80px;margin-bottom:8px;border-radius:6px;background:#f5f5f5;display:flex;align-items:center;justify-content:center;font-size:32px;">
+        🔩
+    </div>
+    @endif
+    <div class="nombre">{{ $producto->nombre }}</div>
+    <div class="precio">$ {{ number_format($producto->precio_venta, 0, ',', '.') }}</div>
+    <div class="stock {{ $producto->stock > $producto->stock_minimo ? 'stock-ok' : ($producto->stock > 0 ? 'stock-bajo' : 'stock-cero') }}">
+        {{ $producto->stock > 0 ? 'Stock: ' . $producto->stock : 'Sin stock' }}
+    </div>
+</div>
+@endforeach
         </div>
     </div>
 
