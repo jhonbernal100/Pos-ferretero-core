@@ -7,6 +7,7 @@ use App\Http\Controllers\InventarioController;
 use App\Http\Controllers\FerreteriaController;
 use App\Http\Controllers\ProveedorController;
 use App\Http\Controllers\ClienteController;
+use App\Http\Controllers\TrialController;
 
 Route::get('/', fn() => redirect('/login'));
 
@@ -56,6 +57,15 @@ Route::middleware('auth')->group(function () {
         Route::post('/{cliente}/creditos',      [ClienteController::class, 'guardarCredito'])->name('clientes.guardarCredito');
         Route::get('/{cliente}/historial',      [ClienteController::class, 'historialCredito'])->name('clientes.historial');
         Route::post('/{cliente}/pagar-credito', [ClienteController::class, 'pagarCredito'])->name('clientes.pagarCredito');
+    });
+
+    // Rutas públicas — registro trial
+    Route::prefix('trial')->group(function () {
+    Route::get('/',                [TrialController::class, 'index'])->name('trial.index');
+    Route::post('/procesar-rut',   [TrialController::class, 'procesarRut'])->name('trial.procesarRut');
+    Route::post('/confirmar',      [TrialController::class, 'confirmar'])->name('trial.confirmar');
+    Route::post('/verificar',      [TrialController::class, 'verificar'])->name('trial.verificar');
+    Route::post('/reenviar-codigo',[TrialController::class, 'reenviarCodigo'])->name('trial.reenviarCodigo');
     });
 
 });
