@@ -8,6 +8,7 @@ use App\Http\Controllers\FerreteriaController;
 use App\Http\Controllers\ProveedorController;
 use App\Http\Controllers\ClienteController;
 use App\Http\Controllers\TrialController;
+use App\Http\Controllers\DevolucionController;
 
 Route::get('/', fn() => redirect('/login'));
 
@@ -66,6 +67,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/confirmar',      [TrialController::class, 'confirmar'])->name('trial.confirmar');
     Route::post('/verificar',      [TrialController::class, 'verificar'])->name('trial.verificar');
     Route::post('/reenviar-codigo',[TrialController::class, 'reenviarCodigo'])->name('trial.reenviarCodigo');
+    Route::get('/{venta}/devolucion',  [DevolucionController::class, 'index'])->name('ventas.devolucion');
+    Route::post('/{venta}/devolucion', [DevolucionController::class, 'procesar'])->name('ventas.procesarDevolucion');
     });
 
 });

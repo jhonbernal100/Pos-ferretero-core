@@ -7,6 +7,9 @@
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
         <h1 style="font-size:22px;">Ventas del día</h1>
         <a href="/ventas/crear" style="padding:10px 20px;background:#000;color:#fff;border-radius:8px;text-decoration:none;font-size:14px;">+ Nueva venta</a>
+        <a href="/ventas/{{ $venta->id }}/devolucion" style="color:#c00;text-decoration:underline;font-size:13px;margin-left:8px;">
+    🔄 Devolver
+</a>
     </div>
 
     <div style="background:#fff;border-radius:12px;overflow:hidden;">
