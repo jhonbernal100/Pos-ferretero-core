@@ -13,7 +13,6 @@
             display: flex;
         }
 
-        /* Panel izquierdo — Login */
         .panel-login {
             width: 420px;
             min-width: 420px;
@@ -27,37 +26,7 @@
             z-index: 1;
         }
 
-        /* Logo SVG */
-        .logo-container {
-            text-align: center;
-            margin-bottom: 8px;
-        }
-
-        .logo-avanzas {
-            font-size: 32px;
-            font-weight: 900;
-            letter-spacing: -1px;
-            color: #000;
-        }
-
-        .logo-avanzas .av { color: #99CF8E; }
-        .logo-avanzas .digital {
-            font-size: 14px;
-            font-weight: 400;
-            color: #CEC8BF;
-            display: block;
-            letter-spacing: 3px;
-            text-transform: uppercase;
-            margin-top: -4px;
-        }
-
-        .pos-titulo {
-            font-size: 22px;
-            font-weight: bold;
-            color: #000;
-            margin: 16px 0 4px;
-            text-align: center;
-        }
+        .logo-container { text-align: center; margin-bottom: 8px; }
 
         .version-badge {
             display: inline-block;
@@ -78,7 +47,6 @@
             font-style: italic;
         }
 
-        /* Separador */
         .divider {
             width: 100%;
             height: 1px;
@@ -86,7 +54,6 @@
             margin-bottom: 24px;
         }
 
-        /* Formulario */
         .form-titulo {
             font-size: 18px;
             font-weight: bold;
@@ -122,6 +89,7 @@
             font-size: 13px;
             margin-bottom: 16px;
             border-left: 3px solid #c00;
+            width: 100%;
         }
 
         .btn-login {
@@ -153,7 +121,7 @@
             font-weight: bold;
         }
 
-        /* Panel derecho — Video y marketing */
+        /* Panel derecho */
         .panel-video {
             flex: 1;
             background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
@@ -179,7 +147,7 @@
 
         .video-titulo {
             color: #fff;
-            font-size: 28px;
+            font-size: 26px;
             font-weight: bold;
             text-align: center;
             margin-bottom: 8px;
@@ -190,62 +158,101 @@
 
         .video-subtitulo {
             color: #CEC8BF;
-            font-size: 15px;
+            font-size: 14px;
             text-align: center;
-            margin-bottom: 32px;
+            margin-bottom: 24px;
             z-index: 1;
         }
 
-        .video-wrapper {
+        /* Carrusel */
+        .carrusel-wrapper {
             width: 100%;
             max-width: 680px;
-            aspect-ratio: 16/9;
-            border-radius: 16px;
-            overflow: hidden;
-            background: #000;
-            border: 2px solid #333;
             z-index: 1;
+        }
+
+        .carrusel-box {
+            width: 100%;
+            aspect-ratio: 16/9;
+            border-radius: 14px;
+            overflow: hidden;
+            background: #111;
+            border: 1px solid #333;
             position: relative;
         }
 
-        .video-wrapper video {
+        .carrusel-box img {
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
             object-fit: cover;
+            opacity: 0;
+            transition: opacity 0.8s ease;
         }
 
-        /* Placeholder cuando no hay video */
-        .video-placeholder {
-            width: 100%;
-            height: 100%;
+        .carrusel-box img.activo { opacity: 1; }
+
+        .indicadores {
             display: flex;
-            flex-direction: column;
-            align-items: center;
             justify-content: center;
-            background: #111;
-            color: #555;
+            gap: 6px;
+            margin-top: 12px;
         }
 
-        .video-placeholder .icono { font-size: 64px; margin-bottom: 16px; }
-        .video-placeholder p { font-size: 14px; color: #444; }
+        .indicador {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #444;
+            cursor: pointer;
+            transition: background .3s, transform .3s;
+        }
 
-        /* Features debajo del video */
+        .indicador.activo {
+            background: #99CF8E;
+            transform: scale(1.3);
+        }
+
+        /* Features */
         .features {
             display: flex;
-            gap: 20px;
-            margin-top: 28px;
+            gap: 16px;
+            margin-top: 20px;
             z-index: 1;
+            flex-wrap: wrap;
+            justify-content: center;
         }
 
         .feature {
             text-align: center;
-            color: #fff;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid #333;
+            border-radius: 10px;
+            padding: 10px 14px;
         }
 
-        .feature .icono { font-size: 28px; margin-bottom: 6px; }
-        .feature .texto { font-size: 12px; color: #CEC8BF; line-height: 1.4; }
+        .feature .icono { font-size: 22px; margin-bottom: 4px; }
+        .feature .texto { font-size: 11px; color: #CEC8BF; line-height: 1.4; }
 
-        /* Responsive */
+        /* Badge Gemini */
+        .powered-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 16px;
+            background: #222;
+            border: 1px solid #333;
+            border-radius: 20px;
+            padding: 6px 16px;
+            z-index: 1;
+        }
+
+        .powered-badge .gem-star { width: 16px; height: 16px; }
+        .powered-badge span { font-size: 11px; color: #888; }
+        .powered-badge strong { font-size: 12px; color: #fff; }
+
         @media (max-width: 768px) {
             body { flex-direction: column; }
             .panel-login { width: 100%; min-width: unset; }
@@ -258,23 +265,19 @@
     <!-- Panel izquierdo — Login -->
     <div class="panel-login">
 
-        <!-- Logo real -->
         <div class="logo-container">
-            <img src="/images/logo-pos-ferretero.png" 
-            alt="POS Ferretero" 
-            style="width:260px; max-width:100%;">
+            <img src="/images/logo-pos-ferretero.png"
+                 alt="POS Ferretero"
+                 style="width:260px;max-width:100%;">
         </div>
 
-        <div class="pos-titulo">🔧 POS Ferretero</div>
-        
         @php
             $commits = (int) trim(shell_exec('git rev-list --count HEAD') ?? 0);
-            $major = 1;
-            $minor = floor($commits / 100);
-            $patch = str_pad($commits % 100, 3, '0', STR_PAD_LEFT);
+            $major   = 1;
+            $minor   = floor($commits / 100);
+            $patch   = str_pad($commits % 100, 3, '0', STR_PAD_LEFT);
         @endphp
         <div class="version-badge">v {{ $major }}.{{ $minor }}.{{ $patch }} · {{ date('Y') }}</div>
-
 
         <div class="slogan">Tu éxito es nuestro objetivo</div>
 
@@ -309,22 +312,35 @@
         </div>
     </div>
 
-    <!-- Panel derecho — Video -->
+    <!-- Panel derecho — Carrusel -->
     <div class="panel-video">
+
         <div class="video-titulo">
             El POS más simple para<br>
             <span>ferreterías de barrio</span>
         </div>
+
         <div class="video-subtitulo">
-            Vende, inventaria y controla tu negocio desde cualquier dispositivo
+            Vende, inventaria y controla tu negocio desde cualquier dispositivo.
+            Sin complicaciones, sin instalaciones.
         </div>
 
-        <div class="video-wrapper">
-            {{-- Cuando tengas el video, reemplaza el placeholder con: --}}
-            {{-- <video autoplay loop muted playsinline src="/videos/demo-pos.mp4"></video> --}}
-            <div class="video-placeholder">
-                <div class="icono">🎬</div>
-                <p>Video demostrativo próximamente</p>
+        <div class="carrusel-wrapper">
+            <div class="carrusel-box" id="carrusel">
+                @for($i = 1; $i <= 10; $i++)
+                <img src="/slides/slide-{{ str_pad($i, 2, '0', STR_PAD_LEFT) }}.jpg"
+                     alt="Slide {{ $i }}"
+                     class="slide {{ $i === 1 ? 'activo' : '' }}">
+                @endfor
+            </div>
+
+            <div class="indicadores" id="indicadores">
+                @for($i = 0; $i < 10; $i++)
+                <div class="indicador {{ $i === 0 ? 'activo' : '' }}"
+                     data-index="{{ $i }}"
+                     onclick="irASlide({{ $i }})">
+                </div>
+                @endfor
             </div>
         </div>
 
@@ -350,7 +366,55 @@
                 <div class="texto">PWA<br>móvil</div>
             </div>
         </div>
+
+        <div class="powered-badge">
+            <svg class="gem-star" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <radialGradient id="grd" cx="35%" cy="25%" r="75%">
+                        <stop offset="0%" stop-color="#EA4335"/>
+                        <stop offset="30%" stop-color="#4285F4"/>
+                        <stop offset="65%" stop-color="#34A853"/>
+                        <stop offset="100%" stop-color="#FBBC05"/>
+                    </radialGradient>
+                </defs>
+                <path d="M12 2 C13 7 17 11 22 12 C17 13 13 17 12 22 C11 17 7 13 2 12 C7 11 11 7 12 2 Z"
+                      fill="url(#grd)"/>
+            </svg>
+            <span>Powered by</span>
+            <strong>Google Gemini</strong>
+        </div>
+
     </div>
+
+    <script>
+    let slideActual = 0;
+    const totalSlides = 10;
+    let intervalo;
+
+    function irASlide(index) {
+        const slides      = document.querySelectorAll('.slide');
+        const indicadores = document.querySelectorAll('.indicador');
+
+        slides[slideActual].classList.remove('activo');
+        indicadores[slideActual].classList.remove('activo');
+
+        slideActual = index;
+
+        slides[slideActual].classList.add('activo');
+        indicadores[slideActual].classList.add('activo');
+    }
+
+    function siguienteSlide() {
+        irASlide((slideActual + 1) % totalSlides);
+    }
+
+    intervalo = setInterval(siguienteSlide, 4000);
+
+    document.getElementById('carrusel').addEventListener('mouseenter', () => clearInterval(intervalo));
+    document.getElementById('carrusel').addEventListener('mouseleave', () => {
+        intervalo = setInterval(siguienteSlide, 4000);
+    });
+    </script>
 
 </body>
 </html>
