@@ -147,33 +147,56 @@ Devuélveme ÚNICAMENTE un JSON válido con esta estructura, sin texto adicional
         $foto = $nombre;
     }
 
-    $producto = Producto::updateOrCreate(
-        [
-            'tenant_id'  => session('tenant_id'),
-            'referencia' => $request->referencia,
-        ],
-        [
-            'tenant_id'     => session('tenant_id'),
+    // Solo buscar duplicado si tiene referencia definida
+    $productoExistente = null;
+    if ($request->referencia) {
+        $productoExistente = Producto::where('tenant_id', session('tenant_id'))
+            ->where('referencia', $request->referencia)
+            ->first();
+    }
+
+    if ($productoExistente) {
+        // Actualizar producto existente
+        $productoExistente->update([
             'nombre'        => $request->nombre,
             'marca'         => $request->marca,
             'categoria'     => $request->categoria,
             'unidad'        => $request->unidad ?? 'unidad',
-            'referencia'    => $request->referencia,
             'precio_compra' => $request->precio_compra,
             'precio_venta'  => $request->precio_venta,
             'stock'         => $request->stock,
             'stock_minimo'  => $request->stock_minimo ?? 5,
-            'foto'          => $foto,
+            'foto'          => $foto ?? $productoExistente->foto,
             'activo'        => true,
-        ]
-    );
+        ]);
+
+        return response()->json([
+            'success'  => true,
+            'producto' => $productoExistente,
+            'mensaje'  => 'Producto ya existía — inventario actualizado',
+        ]);
+    }
+
+    // Crear nuevo producto
+    $producto = Producto::create([
+        'tenant_id'     => session('tenant_id'),
+        'nombre'        => $request->nombre,
+        'marca'         => $request->marca,
+        'categoria'     => $request->categoria,
+        'unidad'        => $request->unidad ?? 'unidad',
+        'referencia'    => $request->referencia,
+        'precio_compra' => $request->precio_compra,
+        'precio_venta'  => $request->precio_venta,
+        'stock'         => $request->stock,
+        'stock_minimo'  => $request->stock_minimo ?? 5,
+        'foto'          => $foto,
+        'activo'        => true,
+    ]);
 
     return response()->json([
         'success'  => true,
         'producto' => $producto,
-        'mensaje'  => $producto->wasRecentlyCreated
-            ? 'Producto agregado al inventario'
-            : 'Inventario actualizado',
+        'mensaje'  => 'Producto agregado al inventario',
     ]);
 }
 

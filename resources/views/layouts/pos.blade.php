@@ -113,15 +113,21 @@
             📷 Agregar inventario
         </a>
 
+        <a href="/inventario/crear-manual"
+           class="{{ request()->is('inventario/crear-manual') ? 'activo' : '' }}">
+            ➕ Crear manual
+        </a>
+
+        <a href="/clientes"
+           class="{{ request()->is('clientes*') ? 'activo' : '' }}">
+            👥 Clientes
+        </a>
+
         {{-- Solo dueño y superadmin --}}
         @if(auth()->user()->rol === 'dueno' || auth()->user()->rol === 'superadmin')
             <a href="/inventario"
-               class="{{ request()->is('inventario') && !request()->is('inventario/capturar') ? 'activo' : '' }}">
+               class="{{ request()->is('inventario') && !request()->is('inventario/capturar') && !request()->is('inventario/crear-manual') ? 'activo' : '' }}">
                 📦 Inventario
-            </a>
-            <a href="/clientes"
-               class="{{ request()->is('clientes*') ? 'activo' : '' }}">
-                👥 Clientes
             </a>
             <a href="/proveedores"
                class="{{ request()->is('proveedores*') ? 'activo' : '' }}">
