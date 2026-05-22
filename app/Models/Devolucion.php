@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Devolucion extends Model
 {
+    protected $table = 'devoluciones';
+
     protected $fillable = [
         'tenant_id', 'venta_id', 'venta_nueva_id',
         'tipo', 'monto_devuelto', 'monto_cobrado',
