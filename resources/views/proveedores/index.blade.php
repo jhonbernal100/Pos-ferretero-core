@@ -21,6 +21,7 @@
                     <th style="padding:12px;text-align:left;font-size:13px;">Contacto</th>
                     <th style="padding:12px;text-align:left;font-size:13px;">Teléfono</th>
                     <th style="padding:12px;text-align:left;font-size:13px;">Ciudad</th>
+                    <th style="padding:12px;text-align:left;font-size:13px;">Acciones</th>
                 </tr>
             </thead>
             <tbody>
@@ -31,10 +32,16 @@
                     <td style="padding:12px;font-size:13px;">{{ $proveedor->contacto ?? '—' }}</td>
                     <td style="padding:12px;font-size:13px;">{{ $proveedor->telefono ?? '—' }}</td>
                     <td style="padding:12px;font-size:13px;">{{ $proveedor->ciudad ?? '—' }}</td>
+                    <td style="padding:12px;">
+                        <a href="/proveedores/{{ $proveedor->id }}/editar"
+                           style="padding:6px 14px;background:#000;color:#fff;border-radius:6px;font-size:12px;text-decoration:none;">
+                            ✏️ Editar
+                        </a>
+                    </td>
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="5" style="padding:24px;text-align:center;color:#999;">
+                    <td colspan="6" style="padding:24px;text-align:center;color:#999;">
                         No hay proveedores. <a href="/proveedores/crear" style="color:#000;">Agrega el primero</a>
                     </td>
                 </tr>

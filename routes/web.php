@@ -71,6 +71,9 @@ Route::middleware('auth')->group(function () {
         Route::post('/{cliente}/pagar-credito', [ClienteController::class, 'pagarCredito'])->name('clientes.pagarCredito');
         Route::get('/{cliente}/editar',    [ClienteController::class, 'editar'])->name('clientes.editar');
         Route::post('/{cliente}/actualizar',[ClienteController::class, 'actualizar'])->name('clientes.actualizar');
+        Route::get('/{proveedor}/editar',     [ProveedorController::class, 'editar'])->name('proveedores.editar');
+        Route::post('/{proveedor}/actualizar',[ProveedorController::class, 'actualizar'])->name('proveedores.actualizar');
+    
     });
 
 });
