@@ -25,7 +25,7 @@
                     <th style="padding:12px;text-align:left;font-size:13px;">Documento</th>
                     <th style="padding:12px;text-align:left;font-size:13px;">Teléfono</th>
                     <th style="padding:12px;text-align:left;font-size:13px;">Ciudad</th>
-                    <th style="padding:12px;text-align:left;font-size:13px;">Crédito</th>
+                    <th style="padding:12px;text-align:left;font-size:13px;">Acciones</th>
                 </tr>
             </thead>
             <tbody>
@@ -37,10 +37,16 @@
                     <td style="padding:12px;font-size:13px;">{{ $cliente->telefono ?? '—' }}</td>
                     <td style="padding:12px;font-size:13px;">{{ $cliente->ciudad ?? '—' }}</td>
                     <td style="padding:12px;">
-                        <a href="/clientes/{{ $cliente->id }}/creditos"
-                           style="padding:6px 12px;background:#f0f0f0;border-radius:6px;font-size:12px;text-decoration:none;color:#000;">
-                            💳 Ver crédito
-                        </a>
+                        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                            <a href="/clientes/{{ $cliente->id }}/editar"
+                               style="padding:6px 12px;background:#000;color:#fff;border-radius:6px;font-size:12px;text-decoration:none;">
+                                ✏️ Editar
+                            </a>
+                            <a href="/clientes/{{ $cliente->id }}/creditos"
+                               style="padding:6px 12px;background:#f0f0f0;border-radius:6px;font-size:12px;text-decoration:none;color:#000;">
+                                💳 Crédito
+                            </a>
+                        </div>
                     </td>
                 </tr>
                 @empty

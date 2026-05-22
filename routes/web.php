@@ -69,6 +69,8 @@ Route::middleware('auth')->group(function () {
         Route::post('/{cliente}/creditos',      [ClienteController::class, 'guardarCredito'])->name('clientes.guardarCredito');
         Route::get('/{cliente}/historial',      [ClienteController::class, 'historialCredito'])->name('clientes.historial');
         Route::post('/{cliente}/pagar-credito', [ClienteController::class, 'pagarCredito'])->name('clientes.pagarCredito');
+        Route::get('/{cliente}/editar',    [ClienteController::class, 'editar'])->name('clientes.editar');
+        Route::post('/{cliente}/actualizar',[ClienteController::class, 'actualizar'])->name('clientes.actualizar');
     });
 
 });
