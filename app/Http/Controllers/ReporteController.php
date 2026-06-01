@@ -148,19 +148,29 @@ public function ventasMes(Request $request)
 }
 public function creditos()
 {
-    $creditos = \App\Models\Credito::with('cliente')
+    // Clientes con saldo usado (deudores)
+    $conSaldo = \App\Models\Credito::with('cliente')
         ->where('saldo_usado', '>', 0)
         ->orderByDesc('saldo_usado')
         ->get();
 
-    $totalCartera      = $creditos->sum('saldo_usado');
-    $totalClientes     = $creditos->count();
-    $creditosActivos   = $creditos->where('estado', 'activo')->count();
-    $creditosBloqueados= $creditos->where('estado', 'bloqueado')->count();
+    // Clientes con credito aprobado pero sin usar
+    $sinUsar = \App\Models\Credito::with('cliente')
+        ->where('saldo_usado', 0)
+        ->where('tope_credito', '>', 0)
+        ->where('estado', 'activo')
+        ->orderByDesc('tope_credito')
+        ->get();
+
+    $totalCartera       = $conSaldo->sum('saldo_usado');
+    $totalClientes      = $conSaldo->count();
+    $creditosActivos    = $conSaldo->where('estado', 'activo')->count();
+    $creditosBloqueados = $conSaldo->where('estado', 'bloqueado')->count();
+    $totalDisponible    = $sinUsar->sum('tope_credito');
 
     $pdf = Pdf::loadView('reportes.pdf.creditos', compact(
-        'creditos', 'totalCartera', 'totalClientes',
-        'creditosActivos', 'creditosBloqueados'
+        'conSaldo', 'sinUsar', 'totalCartera', 'totalClientes',
+        'creditosActivos', 'creditosBloqueados', 'totalDisponible'
     ))->setPaper('letter', 'portrait');
 
     return $pdf->stream('cartera-creditos-' . now()->format('Y-m-d') . '.pdf');

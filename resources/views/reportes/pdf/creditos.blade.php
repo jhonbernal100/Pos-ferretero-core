@@ -66,7 +66,52 @@
         <div class="label">Bloqueados</div>
         <div class="valor" style="color:#856404;">{{ $creditosBloqueados }}</div>
     </div>
+    <div class="card" style="border-left:3px solid #34A853;">
+        <div class="label">Cupo sin usar</div>
+        <div class="valor" style="color:#34A853;">$ {{ number_format($totalDisponible, 0, ',', '.') }}</div>
+    </div>
 </div>
+{{-- Clientes con credito sin usar --}}
+@if($sinUsar->count() > 0)
+<div style="margin:20px 16px 0;">
+    <div style="font-size:12px;font-weight:bold;border-bottom:2px solid #155724;padding-bottom:4px;margin-bottom:8px;">
+        CREDITOS APROBADOS SIN USAR ({{ $sinUsar->count() }} clientes)
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th style="background:#155724;">#</th>
+                <th style="background:#155724;">Cliente</th>
+                <th style="background:#155724;">Documento</th>
+                <th style="background:#155724;">Telefono</th>
+                <th style="background:#155724;text-align:right;">Cupo disponible</th>
+                <th style="background:#155724;text-align:center;">Estado</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach($sinUsar as $i => $credito)
+            <tr style="background:{{ $i % 2 === 0 ? '#f9fff9' : '#fff' }}">
+                <td>{{ $i + 1 }}</td>
+                <td><strong>{{ $credito->cliente->nombre ?? 'N/A' }}</strong></td>
+                <td>{{ $credito->cliente->tipo_documento ?? '' }} {{ $credito->cliente->numero_documento ?? '-' }}</td>
+                <td>{{ $credito->cliente->telefono ?? '-' }}</td>
+                <td style="text-align:right;font-weight:bold;color:#155724;">
+                    $ {{ number_format($credito->tope_credito, 0, ',', '.') }}
+                </td>
+                <td style="text-align:center;color:#155724;font-weight:bold;">DISPONIBLE</td>
+            </tr>
+            @endforeach
+            <tr style="background:#155724;color:#fff;">
+                <td colspan="4" style="padding:7px 8px;font-weight:bold;color:#fff;">TOTAL DISPONIBLE</td>
+                <td style="padding:7px 8px;text-align:right;font-weight:bold;color:#fff;">
+                    $ {{ number_format($totalDisponible, 0, ',', '.') }}
+                </td>
+                <td style="padding:7px 8px;text-align:center;color:#fff;">{{ $sinUsar->count() }} clientes</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+@endif
 
 {{-- Tabla de cartera --}}
 <table>
