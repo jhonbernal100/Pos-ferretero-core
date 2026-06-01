@@ -78,65 +78,74 @@ class ReporteController extends Controller
     }
 
     public function ventasSemana()
-    {
-        $inicio = Carbon::now()->startOfWeek();
-        $fin    = Carbon::now()->endOfWeek();
+{
+    $inicio = Carbon::now()->startOfWeek();
+    $fin    = Carbon::now()->endOfWeek();
 
-        $ventas = Venta::with('cliente', 'detalles')
-            ->whereBetween('created_at', [$inicio, $fin])
-            ->where('estado', 'completada')
-            ->orderByDesc('created_at')
-            ->get();
-
-        $totalIngresos = $ventas->sum('total');
-
-        $ventasPorDia = $ventas->groupBy(fn($v) => $v->created_at->format('Y-m-d'))
-            ->map(fn($grupo) => $grupo->sum('total'));
-
-        $pdf = Pdf::loadView('reportes.pdf.ventas-semana', compact(
-            'ventas', 'totalIngresos', 'ventasPorDia', 'inicio', 'fin'
-        ))->setPaper('letter', 'portrait');
-
-        return $pdf->stream('ventas-semana-' . now()->format('Y-m-d') . '.pdf');
-    }
-
-    public function ventasMes(Request $request)
-    {
-        $mes  = $request->mes ?? now()->month;
-        $anio = $request->anio ?? now()->year;
-
-        $inicio = Carbon::createFromDate($anio, $mes, 1)->startOfMonth();
-        $fin    = Carbon::createFromDate($anio, $mes, 1)->endOfMonth();
-
-        $ventas = Venta::with('cliente', 'detalles')
-            ->whereBetween('created_at', [$inicio, $fin])
-            ->where('estado', 'completada')
-            ->orderByDesc('created_at')
-            ->get();
-
-        $totalIngresos = $ventas->sum('total');
-
-        $productosVendidos = VentaDetalle::whereHas('venta', fn($q) =>
-            $q->whereBetween('created_at', [$inicio, $fin])
-              ->where('estado', 'completada')
-              ->where('tenant_id', session('tenant_id'))
-        )
-        ->selectRaw('nombre_producto, SUM(cantidad) as total_cantidad, SUM(subtotal) as total_ingresos')
-        ->groupBy('nombre_producto')
-        ->orderByDesc('total_cantidad')
-        ->limit(10)
+    $ventas = Venta::with('cliente', 'detalles')
+        ->whereBetween('created_at', [$inicio, $fin])
+        ->where('estado', 'completada')
+        ->orderByDesc('created_at')
         ->get();
 
-        $ventasPorDia = $ventas->groupBy(fn($v) => $v->created_at->format('d'))
-            ->map(fn($grupo) => $grupo->sum('total'));
+    $totalIngresos      = $ventas->sum('total');
+    $totalEfectivo      = $ventas->where('metodo_pago', 'efectivo')->sum('total');
+    $totalTransferencia = $ventas->where('metodo_pago', 'transferencia')->sum('total');
+    $totalCredito       = $ventas->where('metodo_pago', 'credito')->sum('total');
 
-        $pdf = Pdf::loadView('reportes.pdf.ventas-mes', compact(
-            'ventas', 'totalIngresos', 'productosVendidos',
-            'ventasPorDia', 'inicio', 'fin', 'mes', 'anio'
-        ))->setPaper('letter', 'portrait');
+    $ventasPorDia = $ventas->groupBy(fn($v) => $v->created_at->format('Y-m-d'))
+        ->map(fn($grupo) => $grupo->sum('total'));
 
-        return $pdf->stream('ventas-mes-' . $inicio->format('Y-m') . '.pdf');
-    }
+    $pdf = Pdf::loadView('reportes.pdf.ventas-semana', compact(
+        'ventas', 'totalIngresos', 'totalEfectivo',
+        'totalTransferencia', 'totalCredito',
+        'ventasPorDia', 'inicio', 'fin'
+    ))->setPaper('letter', 'portrait');
+
+    return $pdf->stream('ventas-semana-' . now()->format('Y-m-d') . '.pdf');
+}
+
+public function ventasMes(Request $request)
+{
+    $mes  = $request->mes ?? now()->month;
+    $anio = $request->anio ?? now()->year;
+
+    $inicio = Carbon::createFromDate($anio, $mes, 1)->startOfMonth();
+    $fin    = Carbon::createFromDate($anio, $mes, 1)->endOfMonth();
+
+    $ventas = Venta::with('cliente', 'detalles')
+        ->whereBetween('created_at', [$inicio, $fin])
+        ->where('estado', 'completada')
+        ->orderByDesc('created_at')
+        ->get();
+
+    $totalIngresos      = $ventas->sum('total');
+    $totalEfectivo      = $ventas->where('metodo_pago', 'efectivo')->sum('total');
+    $totalTransferencia = $ventas->where('metodo_pago', 'transferencia')->sum('total');
+    $totalCredito       = $ventas->where('metodo_pago', 'credito')->sum('total');
+
+    $productosVendidos = VentaDetalle::whereHas('venta', fn($q) =>
+        $q->whereBetween('created_at', [$inicio, $fin])
+          ->where('estado', 'completada')
+          ->where('tenant_id', session('tenant_id'))
+    )
+    ->selectRaw('nombre_producto, SUM(cantidad) as total_cantidad, SUM(subtotal) as total_ingresos')
+    ->groupBy('nombre_producto')
+    ->orderByDesc('total_cantidad')
+    ->limit(10)
+    ->get();
+
+    $ventasPorDia = $ventas->groupBy(fn($v) => $v->created_at->format('d'))
+        ->map(fn($grupo) => $grupo->sum('total'));
+
+    $pdf = Pdf::loadView('reportes.pdf.ventas-mes', compact(
+        'ventas', 'totalIngresos', 'totalEfectivo',
+        'totalTransferencia', 'totalCredito',
+        'productosVendidos', 'ventasPorDia', 'inicio', 'fin', 'mes', 'anio'
+    ))->setPaper('letter', 'portrait');
+
+    return $pdf->stream('ventas-mes-' . $inicio->format('Y-m') . '.pdf');
+}
 
     public function kardex(Request $request)
     {
