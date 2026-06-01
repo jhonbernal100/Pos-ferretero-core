@@ -9,6 +9,8 @@ use App\Http\Controllers\ProveedorController;
 use App\Http\Controllers\ClienteController;
 use App\Http\Controllers\TrialController;
 use App\Http\Controllers\DevolucionController;
+use App\Http\Controllers\ReporteController;
+
 
 Route::get('/', fn() => redirect('/login'));
 
@@ -74,6 +76,16 @@ Route::middleware('auth')->group(function () {
         Route::post('/{cliente}/pagar-credito', [ClienteController::class, 'pagarCredito'])->name('clientes.pagarCredito');
         Route::get('/{cliente}/editar',         [ClienteController::class, 'editar'])->name('clientes.editar');
         Route::post('/{cliente}/actualizar',    [ClienteController::class, 'actualizar'])->name('clientes.actualizar');
+    });
+
+    Route::prefix('reportes')->group(function () {
+        Route::get('/',              [ReporteController::class, 'index'])->name('reportes.index');
+        Route::get('/inventario',    [ReporteController::class, 'inventario'])->name('reportes.inventario');
+        Route::get('/stock-bajo',    [ReporteController::class, 'stockBajo'])->name('reportes.stockBajo');
+        Route::get('/ventas-dia',    [ReporteController::class, 'ventasDia'])->name('reportes.ventasDia');
+        Route::get('/ventas-semana', [ReporteController::class, 'ventasSemana'])->name('reportes.ventasSemana');
+        Route::get('/ventas-mes',    [ReporteController::class, 'ventasMes'])->name('reportes.ventasMes');
+        Route::get('/kardex',        [ReporteController::class, 'kardex'])->name('reportes.kardex');
     });
 
 });

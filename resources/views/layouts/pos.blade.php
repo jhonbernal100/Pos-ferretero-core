@@ -133,6 +133,10 @@
                class="{{ request()->is('proveedores*') ? 'activo' : '' }}">
                 🚚 Proveedores
             </a>
+            <a href="/reportes"
+               class="{{ request()->is('reportes*') ? 'activo' : '' }}">
+                📊 Reportes
+            </a>
             <a href="/ferreteria/perfil"
                class="{{ request()->is('ferreteria/perfil') ? 'activo' : '' }}">
                 🏪 Mi ferretería
