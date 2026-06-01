@@ -25,6 +25,8 @@ Route::prefix('trial')->group(function () {
     Route::post('/confirmar',       [TrialController::class, 'confirmar'])->name('trial.confirmar');
     Route::post('/verificar',       [TrialController::class, 'verificar'])->name('trial.verificar');
     Route::post('/reenviar-codigo', [TrialController::class, 'reenviarCodigo'])->name('trial.reenviarCodigo');
+    Route::get('/paso2', fn() => view('trial.paso2'))->name('trial.paso2');
+    Route::get('/paso3', fn() => view('trial.paso3'))->name('trial.paso3');
 });
 
 Route::middleware('auth')->group(function () {

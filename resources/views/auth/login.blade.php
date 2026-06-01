@@ -305,11 +305,15 @@
         </form>
 
         <div class="footer-login">
-            ¿Necesitas acceso?
-            <a href="https://www.avanzas.digital/index.html" target="_blank">
-                Contacta a Avanzas Digital
-            </a>
-        </div>
+    ¿Necesitas acceso?
+    <a href="https://www.avanzas.digital/index.html" target="_blank">
+        Contacta a Avanzas Digital
+    </a>
+    <br>
+    <a href="/trial" style="color:#000;font-weight:bold;">
+        Solicitar demo gratuito de 30 dias
+    </a>
+    </div>
     </div>
 
     <!-- Panel derecho — Carrusel -->
