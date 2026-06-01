@@ -146,7 +146,25 @@ public function ventasMes(Request $request)
 
     return $pdf->stream('ventas-mes-' . $inicio->format('Y-m') . '.pdf');
 }
+public function creditos()
+{
+    $creditos = \App\Models\Credito::with('cliente')
+        ->where('saldo_usado', '>', 0)
+        ->orderByDesc('saldo_usado')
+        ->get();
 
+    $totalCartera      = $creditos->sum('saldo_usado');
+    $totalClientes     = $creditos->count();
+    $creditosActivos   = $creditos->where('estado', 'activo')->count();
+    $creditosBloqueados= $creditos->where('estado', 'bloqueado')->count();
+
+    $pdf = Pdf::loadView('reportes.pdf.creditos', compact(
+        'creditos', 'totalCartera', 'totalClientes',
+        'creditosActivos', 'creditosBloqueados'
+    ))->setPaper('letter', 'portrait');
+
+    return $pdf->stream('cartera-creditos-' . now()->format('Y-m-d') . '.pdf');
+}
     public function kardex(Request $request)
     {
         $request->validate([

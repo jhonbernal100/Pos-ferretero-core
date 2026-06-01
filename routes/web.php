@@ -86,6 +86,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/ventas-semana', [ReporteController::class, 'ventasSemana'])->name('reportes.ventasSemana');
         Route::get('/ventas-mes',    [ReporteController::class, 'ventasMes'])->name('reportes.ventasMes');
         Route::get('/kardex',        [ReporteController::class, 'kardex'])->name('reportes.kardex');
+        Route::get('/creditos', [ReporteController::class, 'creditos'])->name('reportes.creditos');
     });
 
 });
