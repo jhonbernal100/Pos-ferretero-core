@@ -273,5 +273,13 @@ Devuélveme ÚNICAMENTE un JSON válido con esta estructura, sin texto adicional
     ]);
 }
 
+public function eliminar(Producto $producto)
+{
+    $producto->delete();
 
+    return response()->json([
+        'success' => true,
+        'mensaje' => 'Producto eliminado correctamente',
+    ]);
+}
 }

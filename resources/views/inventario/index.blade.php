@@ -38,7 +38,8 @@
             <tbody id="tabla-productos">
                 @forelse($productos as $producto)
                 <tr style="border-bottom:1px solid #eee;" class="fila-producto"
-                    data-nombre="{{ strtolower($producto->nombre) }}">
+                    data-nombre="{{ strtolower($producto->nombre) }}"
+                    id="fila-prod-{{ $producto->id }}">
                     <td style="padding:8px;">
                         @if($producto->foto)
                         <img src="{{ asset('storage/' . $producto->foto) }}"
@@ -69,10 +70,16 @@
                         </span>
                     </td>
                     <td style="padding:12px;text-align:center;">
-                        <a href="/inventario/{{ $producto->id }}/editar"
-                           style="padding:6px 14px;background:#000;color:#fff;border-radius:6px;font-size:12px;text-decoration:none;">
-                            ✏️ Editar
-                        </a>
+                        <div style="display:flex;gap:6px;justify-content:center;">
+                            <a href="/inventario/{{ $producto->id }}/editar"
+                               style="padding:6px 12px;background:#000;color:#fff;border-radius:6px;font-size:12px;text-decoration:none;">
+                                ✏️ Editar
+                            </a>
+                            <button onclick="eliminarProducto({{ $producto->id }}, '{{ addslashes($producto->nombre) }}')"
+                                style="padding:6px 12px;background:#c00;color:#fff;border:none;border-radius:6px;font-size:12px;cursor:pointer;">
+                                🗑 Eliminar
+                            </button>
+                        </div>
                     </td>
                 </tr>
                 @empty
@@ -100,6 +107,7 @@
     <div style="color:#aaa;font-size:13px;margin-top:8px;">Toca para cerrar</div>
 </div>
 
+@section('scripts')
 <script>
 document.getElementById('buscador').addEventListener('input', function() {
     const q = this.value.toLowerCase();
@@ -118,5 +126,26 @@ function verFoto(url, nombre) {
 function cerrarModal() {
     document.getElementById('modal-foto').style.display = 'none';
 }
+
+async function eliminarProducto(id, nombre) {
+    if (!confirm(`¿Eliminar "${nombre}" del inventario?\n\nEsta acción no se puede deshacer.`)) return;
+
+    const res = await fetch(`/inventario/${id}/eliminar`, {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+        },
+    });
+
+    const data = await res.json();
+    if (data.success) {
+        document.getElementById('fila-prod-' + id).remove();
+        alert('✅ ' + data.mensaje);
+    } else {
+        alert('❌ Error: ' + data.mensaje);
+    }
+}
 </script>
+@endsection
 @endsection

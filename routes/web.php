@@ -73,7 +73,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/{cliente}/actualizar',[ClienteController::class, 'actualizar'])->name('clientes.actualizar');
         Route::get('/{proveedor}/editar',     [ProveedorController::class, 'editar'])->name('proveedores.editar');
         Route::post('/{proveedor}/actualizar',[ProveedorController::class, 'actualizar'])->name('proveedores.actualizar');
-    
+        Route::delete('/{producto}/eliminar', [InventarioController::class, 'eliminar'])->name('inventario.eliminar');
     });
 
 });
