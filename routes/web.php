@@ -28,25 +28,26 @@ Route::prefix('trial')->group(function () {
 Route::middleware('auth')->group(function () {
 
     Route::prefix('ventas')->group(function () {
-        Route::get('/',                         [VentaController::class, 'index'])->name('ventas.index');
-        Route::get('/crear',                    [VentaController::class, 'crear'])->name('ventas.crear');
-        Route::post('/',                        [VentaController::class, 'store'])->name('ventas.store');
-        Route::get('/{venta}/ticket',           [VentaController::class, 'ticket'])->name('ventas.ticket');
-        Route::post('/{venta}/anular',          [VentaController::class, 'anular'])->name('ventas.anular');
-        Route::get('/{venta}/ticket-abono',     [VentaController::class, 'ticketAbono'])->name('ventas.ticketAbono');
-        Route::get('/{venta}/devolucion',       [DevolucionController::class, 'index'])->name('ventas.devolucion');
-        Route::post('/{venta}/devolucion',      [DevolucionController::class, 'procesar'])->name('ventas.procesarDevolucion');
+        Route::get('/',                     [VentaController::class, 'index'])->name('ventas.index');
+        Route::get('/crear',                [VentaController::class, 'crear'])->name('ventas.crear');
+        Route::post('/',                    [VentaController::class, 'store'])->name('ventas.store');
+        Route::get('/{venta}/ticket',       [VentaController::class, 'ticket'])->name('ventas.ticket');
+        Route::post('/{venta}/anular',      [VentaController::class, 'anular'])->name('ventas.anular');
+        Route::get('/{venta}/ticket-abono', [VentaController::class, 'ticketAbono'])->name('ventas.ticketAbono');
+        Route::get('/{venta}/devolucion',   [DevolucionController::class, 'index'])->name('ventas.devolucion');
+        Route::post('/{venta}/devolucion',  [DevolucionController::class, 'procesar'])->name('ventas.procesarDevolucion');
     });
 
     Route::prefix('inventario')->group(function () {
-        Route::get('/',                               [InventarioController::class, 'index'])->name('inventario.index');
-        Route::get('/capturar',                       [InventarioController::class, 'capturar'])->name('inventario.capturar');
-        Route::post('/analizar',                      [InventarioController::class, 'analizar'])->name('inventario.analizar');
-        Route::post('/guardar',                       [InventarioController::class, 'guardar'])->name('inventario.guardar');
-        Route::get('/crear-manual',                   [InventarioController::class, 'crear'])->name('inventario.crear');
-        Route::get('/{producto}/editar',              [InventarioController::class, 'editar'])->name('inventario.editar');
-        Route::post('/{producto}/actualizar',         [InventarioController::class, 'actualizar'])->name('inventario.actualizar');
-        Route::post('/{producto}/actualizar-producto',[InventarioController::class, 'actualizar_producto'])->name('inventario.actualizarProducto');
+        Route::get('/',                                [InventarioController::class, 'index'])->name('inventario.index');
+        Route::get('/capturar',                        [InventarioController::class, 'capturar'])->name('inventario.capturar');
+        Route::post('/analizar',                       [InventarioController::class, 'analizar'])->name('inventario.analizar');
+        Route::post('/guardar',                        [InventarioController::class, 'guardar'])->name('inventario.guardar');
+        Route::get('/crear-manual',                    [InventarioController::class, 'crear'])->name('inventario.crear');
+        Route::get('/{producto}/editar',               [InventarioController::class, 'editar'])->name('inventario.editar');
+        Route::post('/{producto}/actualizar',          [InventarioController::class, 'actualizar'])->name('inventario.actualizar');
+        Route::post('/{producto}/actualizar-producto', [InventarioController::class, 'actualizar_producto'])->name('inventario.actualizarProducto');
+        Route::delete('/{producto}/eliminar',          [InventarioController::class, 'eliminar'])->name('inventario.eliminar');
     });
 
     Route::prefix('ferreteria')->group(function () {
@@ -56,9 +57,11 @@ Route::middleware('auth')->group(function () {
     });
 
     Route::prefix('proveedores')->group(function () {
-        Route::get('/',      [ProveedorController::class, 'index'])->name('proveedores.index');
-        Route::get('/crear', [ProveedorController::class, 'crear'])->name('proveedores.crear');
-        Route::post('/',     [ProveedorController::class, 'store'])->name('proveedores.store');
+        Route::get('/',                       [ProveedorController::class, 'index'])->name('proveedores.index');
+        Route::get('/crear',                  [ProveedorController::class, 'crear'])->name('proveedores.crear');
+        Route::post('/',                      [ProveedorController::class, 'store'])->name('proveedores.store');
+        Route::get('/{proveedor}/editar',     [ProveedorController::class, 'editar'])->name('proveedores.editar');
+        Route::post('/{proveedor}/actualizar',[ProveedorController::class, 'actualizar'])->name('proveedores.actualizar');
     });
 
     Route::prefix('clientes')->group(function () {
@@ -69,11 +72,8 @@ Route::middleware('auth')->group(function () {
         Route::post('/{cliente}/creditos',      [ClienteController::class, 'guardarCredito'])->name('clientes.guardarCredito');
         Route::get('/{cliente}/historial',      [ClienteController::class, 'historialCredito'])->name('clientes.historial');
         Route::post('/{cliente}/pagar-credito', [ClienteController::class, 'pagarCredito'])->name('clientes.pagarCredito');
-        Route::get('/{cliente}/editar',    [ClienteController::class, 'editar'])->name('clientes.editar');
-        Route::post('/{cliente}/actualizar',[ClienteController::class, 'actualizar'])->name('clientes.actualizar');
-        Route::get('/{proveedor}/editar',     [ProveedorController::class, 'editar'])->name('proveedores.editar');
-        Route::post('/{proveedor}/actualizar',[ProveedorController::class, 'actualizar'])->name('proveedores.actualizar');
-        Route::delete('/{producto}/eliminar', [InventarioController::class, 'eliminar'])->name('inventario.eliminar');
+        Route::get('/{cliente}/editar',         [ClienteController::class, 'editar'])->name('clientes.editar');
+        Route::post('/{cliente}/actualizar',    [ClienteController::class, 'actualizar'])->name('clientes.actualizar');
     });
 
 });
