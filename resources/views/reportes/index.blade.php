@@ -89,6 +89,19 @@
             </button>
         </div>
 
+        {{-- Cartera creditos --}}
+<div style="background:#fff;border-radius:12px;padding:20px;border-left:4px solid #EA4335;">
+    <div style="font-size:32px;margin-bottom:8px;">💳</div>
+    <h3 style="font-size:16px;margin-bottom:6px;">Cartera de creditos</h3>
+    <p style="font-size:13px;color:#888;margin-bottom:16px;">
+        Clientes con saldo pendiente, topes y porcentaje de uso del cupo.
+    </p>
+    <a href="/reportes/creditos" target="_blank"
+       style="display:block;padding:10px;background:#000;color:#fff;text-align:center;border-radius:8px;text-decoration:none;font-size:14px;">
+        Generar PDF
+    </a>
+</div>
+
         {{-- Kardex --}}
         <div style="background:#fff;border-radius:12px;padding:20px;border-left:4px solid #CEC8BF;">
             <div style="font-size:32px;margin-bottom:8px;">📋</div>
@@ -112,18 +125,7 @@
     </div>
 </div>
 
-{{-- Cartera creditos --}}
-<div style="background:#fff;border-radius:12px;padding:20px;border-left:4px solid #EA4335;">
-    <div style="font-size:32px;margin-bottom:8px;">💳</div>
-    <h3 style="font-size:16px;margin-bottom:6px;">Cartera de creditos</h3>
-    <p style="font-size:13px;color:#888;margin-bottom:16px;">
-        Clientes con saldo pendiente, topes y porcentaje de uso del cupo.
-    </p>
-    <a href="/reportes/creditos" target="_blank"
-       style="display:block;padding:10px;background:#000;color:#fff;text-align:center;border-radius:8px;text-decoration:none;font-size:14px;">
-        Generar PDF
-    </a>
-</div>
+
 
 <script>
 function generarMes() {
