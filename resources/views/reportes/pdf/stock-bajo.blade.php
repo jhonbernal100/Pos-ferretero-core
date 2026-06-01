@@ -6,8 +6,6 @@
     * { margin:0; padding:0; box-sizing:border-box; }
     body { font-family: Arial, sans-serif; font-size: 11px; }
     .header { background: #856404; color: #fff; padding: 12px 16px; margin-bottom: 16px; }
-    .header h1 { font-size: 18px; }
-    .header p { font-size: 11px; opacity:.8; margin-top:2px; }
     table { width: calc(100% - 32px); margin: 0 16px; border-collapse: collapse; }
     th { background: #856404; color: #fff; padding: 8px; font-size: 10px; text-align: left; }
     td { padding: 7px 8px; font-size: 11px; border-bottom: 1px solid #eee; }
@@ -19,17 +17,32 @@
 <body>
 
 <div class="header">
-    <h1>⚠️ Alerta de Stock Bajo</h1>
-    <p>Generado el {{ now()->format('d/m/Y H:i') }} — {{ auth()->user()->tenant->nombre ?? '' }}</p>
+    <table style="width:100%;border-collapse:collapse;">
+        <tr>
+            <td style="width:70%;vertical-align:middle;">
+                <h1 style="font-size:20px;color:#fff;margin-bottom:4px;">
+                    {{ auth()->user()->tenant->nombre ?? 'Ferreteria' }}
+                </h1>
+                <p style="font-size:11px;opacity:.8;">
+                    NIT: {{ auth()->user()->tenant->nit ?? '' }} |
+                    Tel: {{ auth()->user()->tenant->telefono ?? '' }}
+                </p>
+            </td>
+            <td style="width:30%;text-align:right;vertical-align:middle;">
+                <p style="font-size:13px;font-weight:bold;color:#fff;">ALERTA DE STOCK BAJO</p>
+                <p style="font-size:10px;opacity:.8;">{{ now()->format('d/m/Y H:i') }}</p>
+            </td>
+        </tr>
+    </table>
 </div>
 
 <table>
     <thead>
         <tr>
             <th>Producto</th>
-            <th>Categoría</th>
+            <th>Categoria</th>
             <th style="text-align:center">Stock actual</th>
-            <th style="text-align:center">Stock mínimo</th>
+            <th style="text-align:center">Stock minimo</th>
             <th>Estado</th>
         </tr>
     </thead>
@@ -40,14 +53,12 @@
             <td>{{ $p->categoria }}</td>
             <td style="text-align:center;font-weight:bold;">{{ $p->stock }}</td>
             <td style="text-align:center;">{{ $p->stock_minimo }}</td>
-            <td>{{ $p->stock <= 0 ? '⛔ Agotado' : '⚠️ Stock bajo' }}</td>
+            <td>{{ $p->stock <= 0 ? 'AGOTADO' : 'STOCK BAJO' }}</td>
         </tr>
         @endforeach
     </tbody>
 </table>
 
-<div class="footer">
-    Sistema POS Ferretero — Avanzas Digital
-</div>
+<div class="footer">Sistema POS Ferretero - Avanzas Digital</div>
 </body>
 </html>

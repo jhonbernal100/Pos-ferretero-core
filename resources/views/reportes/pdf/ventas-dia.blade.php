@@ -6,8 +6,6 @@
     * { margin:0; padding:0; box-sizing:border-box; }
     body { font-family: Arial, sans-serif; font-size: 11px; }
     .header { background: #000; color: #fff; padding: 12px 16px; margin-bottom: 16px; }
-    .header h1 { font-size: 18px; }
-    .header p { font-size: 11px; opacity:.8; margin-top:2px; }
     .resumen { display:flex; gap:12px; margin: 0 16px 16px; }
     .card { flex:1; border:1px solid #ddd; border-radius:6px; padding:10px; text-align:center; }
     .card .valor { font-size:16px; font-weight:bold; margin-top:4px; }
@@ -21,8 +19,27 @@
 <body>
 
 <div class="header">
-    <h1>🗓 Ventas del Día</h1>
-    <p>{{ $hoy->format('d/m/Y') }} — {{ auth()->user()->tenant->nombre ?? '' }}</p>
+    <table style="width:100%;border-collapse:collapse;">
+        <tr>
+            <td style="width:70%;vertical-align:middle;">
+                <h1 style="font-size:20px;color:#fff;margin-bottom:4px;">
+                    {{ auth()->user()->tenant->nombre ?? 'Ferreteria' }}
+                </h1>
+                <p style="font-size:11px;opacity:.8;">
+                    NIT: {{ auth()->user()->tenant->nit ?? '' }} |
+                    Tel: {{ auth()->user()->tenant->telefono ?? '' }}
+                </p>
+                <p style="font-size:11px;opacity:.8;">
+                    {{ auth()->user()->tenant->direccion ?? '' }} -
+                    {{ auth()->user()->tenant->ciudad ?? '' }}
+                </p>
+            </td>
+            <td style="width:30%;text-align:right;vertical-align:middle;">
+                <p style="font-size:13px;font-weight:bold;color:#fff;">VENTAS DEL DIA</p>
+                <p style="font-size:10px;opacity:.8;">{{ $hoy->format('d/m/Y') }}</p>
+            </td>
+        </tr>
+    </table>
 </div>
 
 <div class="resumen">
@@ -43,7 +60,7 @@
         <div class="valor">$ {{ number_format($totalTransferencia, 0, ',', '.') }}</div>
     </div>
     <div class="card">
-        <div class="label">Crédito</div>
+        <div class="label">Credito</div>
         <div class="valor">$ {{ number_format($totalCredito, 0, ',', '.') }}</div>
     </div>
 </div>
@@ -79,8 +96,6 @@
     </tbody>
 </table>
 
-<div class="footer">
-    Sistema POS Ferretero — Avanzas Digital
-</div>
+<div class="footer">Sistema POS Ferretero - Avanzas Digital</div>
 </body>
 </html>

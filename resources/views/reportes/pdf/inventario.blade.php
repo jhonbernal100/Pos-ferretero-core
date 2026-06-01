@@ -6,18 +6,16 @@
     * { margin:0; padding:0; box-sizing:border-box; }
     body { font-family: Arial, sans-serif; font-size: 11px; color: #000; }
     .header { background: #000; color: #fff; padding: 12px 16px; margin-bottom: 16px; }
-    .header h1 { font-size: 18px; }
-    .header p { font-size: 11px; opacity: .8; margin-top: 2px; }
     .resumen { display: flex; gap: 12px; margin-bottom: 16px; padding: 0 16px; }
     .card { flex: 1; border: 1px solid #ddd; border-radius: 6px; padding: 10px; text-align: center; }
     .card .valor { font-size: 16px; font-weight: bold; margin-top: 4px; }
     .card .label { font-size: 10px; color: #888; }
-    table { width: 100%; border-collapse: collapse; margin: 0 16px; width: calc(100% - 32px); }
+    table { width: calc(100% - 32px); margin: 0 16px; border-collapse: collapse; }
     th { background: #000; color: #fff; padding: 8px; text-align: left; font-size: 10px; }
     td { padding: 6px 8px; font-size: 10px; border-bottom: 1px solid #eee; }
     tr:nth-child(even) td { background: #f9f9f9; }
     .categoria { background: #f0f0f0; font-weight: bold; }
-    .stock-ok  { color: #155724; }
+    .stock-ok   { color: #155724; }
     .stock-bajo { color: #856404; }
     .stock-cero { color: #721c24; font-weight: bold; }
     .footer { margin-top: 16px; text-align: center; font-size: 9px; color: #aaa; padding: 8px; border-top: 1px solid #eee; }
@@ -26,8 +24,27 @@
 <body>
 
 <div class="header">
-    <h1>📦 Reporte de Inventario</h1>
-    <p>Generado el {{ now()->format('d/m/Y H:i') }} — {{ auth()->user()->tenant->nombre ?? '' }}</p>
+    <table style="width:100%;border-collapse:collapse;">
+        <tr>
+            <td style="width:70%;vertical-align:middle;">
+                <h1 style="font-size:20px;color:#fff;margin-bottom:4px;">
+                    {{ auth()->user()->tenant->nombre ?? 'Ferreteria' }}
+                </h1>
+                <p style="font-size:11px;opacity:.8;">
+                    NIT: {{ auth()->user()->tenant->nit ?? '' }} |
+                    Tel: {{ auth()->user()->tenant->telefono ?? '' }}
+                </p>
+                <p style="font-size:11px;opacity:.8;">
+                    {{ auth()->user()->tenant->direccion ?? '' }} -
+                    {{ auth()->user()->tenant->ciudad ?? '' }}
+                </p>
+            </td>
+            <td style="width:30%;text-align:right;vertical-align:middle;">
+                <p style="font-size:13px;font-weight:bold;color:#99CF8E;">REPORTE DE INVENTARIO</p>
+                <p style="font-size:10px;opacity:.8;">{{ now()->format('d/m/Y H:i') }}</p>
+            </td>
+        </tr>
+    </table>
 </div>
 
 <div class="resumen">
@@ -58,7 +75,7 @@
         <tr>
             <th>Producto</th>
             <th>Marca</th>
-            <th>Categoría</th>
+            <th>Categoria</th>
             <th>Unidad</th>
             <th style="text-align:right">P. Costo</th>
             <th style="text-align:right">P. Venta</th>
@@ -74,7 +91,7 @@
         @foreach($items as $p)
         <tr>
             <td>{{ $p->nombre }}</td>
-            <td>{{ $p->marca ?? '—' }}</td>
+            <td>{{ $p->marca ?? '-' }}</td>
             <td>{{ $p->categoria }}</td>
             <td>{{ $p->unidad }}</td>
             <td style="text-align:right">$ {{ number_format($p->precio_compra, 0, ',', '.') }}</td>
@@ -90,8 +107,7 @@
 </table>
 
 <div class="footer">
-    Sistema POS Ferretero — Avanzas Digital — pos-ferretero.avanzas.digital
+    Sistema POS Ferretero - Avanzas Digital - pos-ferretero.avanzas.digital
 </div>
-
 </body>
 </html>

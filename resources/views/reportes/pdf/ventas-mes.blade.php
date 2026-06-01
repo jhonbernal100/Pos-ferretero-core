@@ -6,8 +6,6 @@
     * { margin:0; padding:0; box-sizing:border-box; }
     body { font-family: Arial, sans-serif; font-size: 11px; }
     .header { background: #EA4335; color: #fff; padding: 12px 16px; margin-bottom: 16px; }
-    .header h1 { font-size: 18px; }
-    .header p { font-size: 11px; opacity:.8; margin-top:2px; }
     .seccion { margin: 0 16px 16px; }
     .seccion h2 { font-size: 13px; margin-bottom:8px; border-bottom:2px solid #EA4335; padding-bottom:4px; }
     table { width:100%; border-collapse:collapse; margin-bottom:16px; }
@@ -20,8 +18,23 @@
 <body>
 
 <div class="header">
-    <h1>📈 Ventas del Mes</h1>
-    <p>{{ $inicio->locale('es')->isoFormat('MMMM YYYY') }} — {{ auth()->user()->tenant->nombre ?? '' }}</p>
+    <table style="width:100%;border-collapse:collapse;">
+        <tr>
+            <td style="width:70%;vertical-align:middle;">
+                <h1 style="font-size:20px;color:#fff;margin-bottom:4px;">
+                    {{ auth()->user()->tenant->nombre ?? 'Ferreteria' }}
+                </h1>
+                <p style="font-size:11px;opacity:.8;">
+                    NIT: {{ auth()->user()->tenant->nit ?? '' }} |
+                    Tel: {{ auth()->user()->tenant->telefono ?? '' }}
+                </p>
+            </td>
+            <td style="width:30%;text-align:right;vertical-align:middle;">
+                <p style="font-size:13px;font-weight:bold;color:#fff;">VENTAS DEL MES</p>
+                <p style="font-size:10px;opacity:.8;">{{ $inicio->locale('es')->isoFormat('MMMM YYYY') }}</p>
+            </td>
+        </tr>
+    </table>
 </div>
 
 <div class="seccion">
@@ -37,7 +50,7 @@
 </div>
 
 <div class="seccion">
-    <h2>Top 10 productos más vendidos</h2>
+    <h2>Top 10 productos mas vendidos</h2>
     <table>
         <thead>
             <tr>
@@ -88,6 +101,6 @@
     </table>
 </div>
 
-<div class="footer">Sistema POS Ferretero — Avanzas Digital</div>
+<div class="footer">Sistema POS Ferretero - Avanzas Digital</div>
 </body>
 </html>
