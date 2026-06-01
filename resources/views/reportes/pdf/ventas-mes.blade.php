@@ -6,12 +6,15 @@
     * { margin:0; padding:0; box-sizing:border-box; }
     body { font-family: Arial, sans-serif; font-size: 11px; }
     .header { background: #EA4335; color: #fff; padding: 12px 16px; margin-bottom: 16px; }
-    .seccion { margin: 0 16px 16px; }
-    .seccion h2 { font-size: 13px; margin-bottom:8px; border-bottom:2px solid #EA4335; padding-bottom:4px; }
-    table { width:100%; border-collapse:collapse; margin-bottom:16px; }
+    .resumen { display:flex; gap:8px; margin: 0 16px 12px; }
+    .card { flex:1; border:1px solid #ddd; border-radius:6px; padding:8px; text-align:center; }
+    .card .valor { font-size:13px; font-weight:bold; margin-top:4px; }
+    .card .label { font-size:9px; color:#888; }
+    table { width:100%; border-collapse:collapse; }
     th { background:#EA4335; color:#fff; padding:7px; font-size:10px; text-align:left; }
     td { padding:6px 7px; font-size:10px; border-bottom:1px solid #eee; }
     .top-prod { background:#fff3cd; }
+    .seccion-titulo { font-size:12px; font-weight:bold; margin: 16px 16px 8px; border-bottom:2px solid #EA4335; padding-bottom:4px; }
     .footer { margin-top:16px; text-align:center; font-size:9px; color:#aaa; padding:8px; border-top:1px solid #eee; }
 </style>
 </head>
@@ -37,27 +40,80 @@
     </table>
 </div>
 
-<div class="seccion">
-    <h2>Resumen</h2>
+{{-- Resumen tarjetas --}}
+<div class="resumen">
+    <div class="card">
+        <div class="label">Total ventas</div>
+        <div class="valor">{{ $ventas->count() }}</div>
+    </div>
+    <div class="card" style="border-left:3px solid #000;">
+        <div class="label">Total ingresos</div>
+        <div class="valor">$ {{ number_format($totalIngresos, 0, ',', '.') }}</div>
+    </div>
+    <div class="card" style="border-left:3px solid #28a745;">
+        <div class="label">Efectivo</div>
+        <div class="valor" style="color:#155724;">$ {{ number_format($totalEfectivo, 0, ',', '.') }}</div>
+    </div>
+    <div class="card" style="border-left:3px solid #4285F4;">
+        <div class="label">Transferencia</div>
+        <div class="valor" style="color:#4285F4;">$ {{ number_format($totalTransferencia, 0, ',', '.') }}</div>
+    </div>
+    <div class="card" style="border-left:3px solid #EA4335;">
+        <div class="label">Credito</div>
+        <div class="valor" style="color:#EA4335;">$ {{ number_format($totalCredito, 0, ',', '.') }}</div>
+    </div>
+</div>
+
+{{-- Tabla discriminada --}}
+<div style="margin:0 16px 16px;">
     <table>
-        <tr>
-            <td><strong>Total ventas:</strong></td>
-            <td>{{ $ventas->count() }}</td>
-            <td><strong>Total ingresos:</strong></td>
-            <td><strong>$ {{ number_format($totalIngresos, 0, ',', '.') }}</strong></td>
-        </tr>
+        <thead>
+            <tr>
+                <th style="background:#155724;">Metodo de pago</th>
+                <th style="background:#155724;text-align:center;">Cantidad</th>
+                <th style="background:#155724;text-align:right;">Total</th>
+                <th style="background:#155724;text-align:right;">Porcentaje</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr style="background:#f9f9f9;">
+                <td style="font-weight:bold;">Efectivo</td>
+                <td style="text-align:center;">{{ $ventas->where('metodo_pago', 'efectivo')->count() }}</td>
+                <td style="text-align:right;color:#155724;font-weight:bold;">$ {{ number_format($totalEfectivo, 0, ',', '.') }}</td>
+                <td style="text-align:right;">{{ $totalIngresos > 0 ? number_format(($totalEfectivo / $totalIngresos) * 100, 1) : 0 }}%</td>
+            </tr>
+            <tr>
+                <td style="font-weight:bold;">Transferencia</td>
+                <td style="text-align:center;">{{ $ventas->where('metodo_pago', 'transferencia')->count() }}</td>
+                <td style="text-align:right;color:#4285F4;font-weight:bold;">$ {{ number_format($totalTransferencia, 0, ',', '.') }}</td>
+                <td style="text-align:right;">{{ $totalIngresos > 0 ? number_format(($totalTransferencia / $totalIngresos) * 100, 1) : 0 }}%</td>
+            </tr>
+            <tr style="background:#f9f9f9;">
+                <td style="font-weight:bold;">Credito</td>
+                <td style="text-align:center;">{{ $ventas->where('metodo_pago', 'credito')->count() }}</td>
+                <td style="text-align:right;color:#EA4335;font-weight:bold;">$ {{ number_format($totalCredito, 0, ',', '.') }}</td>
+                <td style="text-align:right;">{{ $totalIngresos > 0 ? number_format(($totalCredito / $totalIngresos) * 100, 1) : 0 }}%</td>
+            </tr>
+            <tr style="background:#000;">
+                <td style="padding:7px 8px;font-weight:bold;color:#fff;">TOTAL</td>
+                <td style="padding:7px 8px;text-align:center;color:#fff;font-weight:bold;">{{ $ventas->count() }}</td>
+                <td style="padding:7px 8px;text-align:right;color:#fff;font-weight:bold;">$ {{ number_format($totalIngresos, 0, ',', '.') }}</td>
+                <td style="padding:7px 8px;text-align:right;color:#fff;">100%</td>
+            </tr>
+        </tbody>
     </table>
 </div>
 
-<div class="seccion">
-    <h2>Top 10 productos mas vendidos</h2>
+{{-- Top productos --}}
+<div class="seccion-titulo">Top 10 productos mas vendidos</div>
+<div style="margin:0 16px 16px;">
     <table>
         <thead>
             <tr>
                 <th>#</th>
                 <th>Producto</th>
-                <th style="text-align:center">Unidades</th>
-                <th style="text-align:right">Ingresos</th>
+                <th style="text-align:center;">Unidades</th>
+                <th style="text-align:right;">Ingresos</th>
             </tr>
         </thead>
         <tbody>
@@ -73,8 +129,9 @@
     </table>
 </div>
 
-<div class="seccion">
-    <h2>Detalle de ventas</h2>
+{{-- Detalle ventas --}}
+<div class="seccion-titulo">Detalle de ventas</div>
+<div style="margin:0 16px;">
     <table>
         <thead>
             <tr>
@@ -82,7 +139,7 @@
                 <th>Fecha</th>
                 <th>Cliente</th>
                 <th>Pago</th>
-                <th style="text-align:right">Total</th>
+                <th style="text-align:right;">Total</th>
             </tr>
         </thead>
         <tbody>
