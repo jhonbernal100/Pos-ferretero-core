@@ -11,13 +11,11 @@ use Carbon\Carbon;
 
 class ReporteController extends Controller
 {
-    // Menu de reportes
     public function index()
     {
         return view('reportes.index');
     }
 
-    // Reporte de inventario completo
     public function inventario()
     {
         $productos = Producto::where('activo', true)
@@ -39,7 +37,6 @@ class ReporteController extends Controller
         return $pdf->stream('inventario-' . now()->format('Y-m-d') . '.pdf');
     }
 
-    // Reporte de alertas stock bajo
     public function stockBajo()
     {
         $productos = Producto::where('activo', true)
@@ -56,7 +53,6 @@ class ReporteController extends Controller
         return $pdf->stream('stock-bajo-' . now()->format('Y-m-d') . '.pdf');
     }
 
-    // Reporte de ventas del día
     public function ventasDia()
     {
         $hoy = Carbon::today();
@@ -67,10 +63,10 @@ class ReporteController extends Controller
             ->orderByDesc('created_at')
             ->get();
 
-        $totalVentas    = $ventas->count();
-        $totalIngresos  = $ventas->sum('total');
-        $totalEfectivo  = $ventas->where('metodo_pago', 'efectivo')->sum('total');
-        $totalCredito   = $ventas->where('metodo_pago', 'credito')->sum('total');
+        $totalVentas        = $ventas->count();
+        $totalIngresos      = $ventas->sum('total');
+        $totalEfectivo      = $ventas->where('metodo_pago', 'efectivo')->sum('total');
+        $totalCredito       = $ventas->where('metodo_pago', 'credito')->sum('total');
         $totalTransferencia = $ventas->where('metodo_pago', 'transferencia')->sum('total');
 
         $pdf = Pdf::loadView('reportes.pdf.ventas-dia', compact(
@@ -81,7 +77,6 @@ class ReporteController extends Controller
         return $pdf->stream('ventas-dia-' . $hoy->format('Y-m-d') . '.pdf');
     }
 
-    // Reporte de ventas de la semana
     public function ventasSemana()
     {
         $inicio = Carbon::now()->startOfWeek();
@@ -95,7 +90,6 @@ class ReporteController extends Controller
 
         $totalIngresos = $ventas->sum('total');
 
-        // Ventas por día de la semana
         $ventasPorDia = $ventas->groupBy(fn($v) => $v->created_at->format('Y-m-d'))
             ->map(fn($grupo) => $grupo->sum('total'));
 
@@ -106,7 +100,6 @@ class ReporteController extends Controller
         return $pdf->stream('ventas-semana-' . now()->format('Y-m-d') . '.pdf');
     }
 
-    // Reporte de ventas del mes
     public function ventasMes(Request $request)
     {
         $mes  = $request->mes ?? now()->month;
@@ -123,7 +116,6 @@ class ReporteController extends Controller
 
         $totalIngresos = $ventas->sum('total');
 
-        // Productos más vendidos
         $productosVendidos = VentaDetalle::whereHas('venta', fn($q) =>
             $q->whereBetween('created_at', [$inicio, $fin])
               ->where('estado', 'completada')
@@ -135,7 +127,6 @@ class ReporteController extends Controller
         ->limit(10)
         ->get();
 
-        // Ventas por día
         $ventasPorDia = $ventas->groupBy(fn($v) => $v->created_at->format('d'))
             ->map(fn($grupo) => $grupo->sum('total'));
 
@@ -147,7 +138,6 @@ class ReporteController extends Controller
         return $pdf->stream('ventas-mes-' . $inicio->format('Y-m') . '.pdf');
     }
 
-    // Kardex de un producto
     public function kardex(Request $request)
     {
         $request->validate([
@@ -156,7 +146,7 @@ class ReporteController extends Controller
 
         $producto = Producto::findOrFail($request->producto_id);
 
-        // Movimientos de salida (ventas)
+        // Movimientos de salida por ventas
         $salidas = VentaDetalle::with('venta')
             ->where('producto_id', $producto->id)
             ->whereHas('venta', fn($q) =>
@@ -166,9 +156,52 @@ class ReporteController extends Controller
             ->orderBy('created_at')
             ->get();
 
-        $pdf = Pdf::loadView('reportes.pdf.kardex', compact('producto', 'salidas'))
-            ->setPaper('letter', 'portrait');
+        // Totales
+        $totalSalidas  = $salidas->sum('cantidad');
+        $totalIngresos = $salidas->sum('subtotal');
 
-        return $pdf->stream('kardex-' . $producto->nombre . '-' . now()->format('Y-m-d') . '.pdf');
+        // Stock inicial estimado = stock actual + total vendido
+        $stockInicial = $producto->stock + $totalSalidas;
+
+        // Construir movimientos con saldo acumulado
+        $movimientos = [];
+        $saldoActual = $stockInicial;
+
+        // Fila de saldo inicial
+        $movimientos[] = [
+            'fecha'       => $producto->created_at->format('d/m/Y'),
+            'tipo'        => 'SALDO INICIAL',
+            'documento'   => '-',
+            'entrada'     => $stockInicial,
+            'salida'      => 0,
+            'saldo'       => $stockInicial,
+            'costo_unit'  => $producto->precio_compra,
+            'valor_total' => $stockInicial * $producto->precio_compra,
+        ];
+
+        // Agregar salidas por ventas
+        foreach ($salidas as $s) {
+            $saldoActual -= $s->cantidad;
+            $movimientos[] = [
+                'fecha'       => $s->created_at->format('d/m/Y H:i'),
+                'tipo'        => 'VENTA',
+                'documento'   => str_pad($s->venta_id, 6, '0', STR_PAD_LEFT),
+                'entrada'     => 0,
+                'salida'      => $s->cantidad,
+                'saldo'       => $saldoActual,
+                'costo_unit'  => $s->precio_unitario,
+                'valor_total' => $s->subtotal,
+            ];
+        }
+
+        // Limpiar nombre del archivo
+        $nombreArchivo = preg_replace('/[^a-zA-Z0-9\-_]/', '_', $producto->nombre);
+
+        $pdf = Pdf::loadView('reportes.pdf.kardex', compact(
+            'producto', 'movimientos', 'stockInicial',
+            'totalSalidas', 'totalIngresos'
+        ))->setPaper('letter', 'portrait');
+
+        return $pdf->stream('kardex-' . $nombreArchivo . '-' . now()->format('Y-m-d') . '.pdf');
     }
 }
