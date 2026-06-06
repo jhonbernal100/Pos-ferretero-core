@@ -12,6 +12,7 @@ use App\Http\Controllers\DevolucionController;
 use App\Http\Controllers\ReporteController;
 use App\Http\Controllers\GastoController;
 use App\Http\Controllers\UsuarioController;
+use App\Http\Controllers\PlanesController;
 
 Route::get('/', fn() => redirect('/login'));
 
@@ -29,6 +30,9 @@ Route::prefix('trial')->group(function () {
     Route::get('/paso2',            fn() => view('trial.paso2'))->name('trial.paso2');
     Route::get('/paso3',            fn() => view('trial.paso3'))->name('trial.paso3');
 });
+
+
+Route::get('/planes', [PlanesController::class, 'index'])->name('planes.index');
 
 Route::middleware('auth')->group(function () {
 
@@ -109,5 +113,8 @@ Route::middleware('auth')->group(function () {
         Route::post('/{usuario}/toggle-activo', [UsuarioController::class, 'toggleActivo'])->name('usuarios.toggleActivo');
         Route::delete('/{usuario}/eliminar',    [UsuarioController::class, 'eliminar'])->name('usuarios.eliminar');
     });
+
+
+
 
 });
