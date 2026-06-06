@@ -86,82 +86,85 @@
 <body>
 
     <nav class="navbar">
-        <a href="/ventas/crear" class="navbar-brand">
+        <a href="{{ auth()->user()->rol === 'superadmin' ? '/admin/dashboard' : '/ventas/crear' }}"
+           class="navbar-brand">
             POS Ferretero
         </a>
         <div class="navbar-user">
             {{ auth()->user()->name ?? 'Usuario' }}
-            <span>{{ auth()->user()->tenant->nombre ?? '' }}</span>
+            <span>{{ auth()->user()->tenant->nombre ?? 'Avanzas Digital' }}</span>
         </div>
     </nav>
 
     <div class="toolbar">
 
-        {{-- Solo superadmin --}}
+        {{-- SUPERADMIN: solo ve Panel Admin --}}
         @if(auth()->user()->rol === 'superadmin')
             <a href="/admin/dashboard"
                class="{{ request()->is('admin*') ? 'activo' : '' }}"
                style="background:#99CF8E;color:#000;font-weight:bold;border-color:#99CF8E;">
                 Panel Admin
             </a>
-        @endif
 
-        {{-- Comun para todos los roles --}}
-        <a href="/ventas/crear"
-           class="{{ request()->is('ventas/crear') ? 'activo' : '' }}">
-            Nueva venta
-        </a>
+        {{-- DUENO Y AUXILIAR: menu completo --}}
+        @else
+            <a href="/ventas/crear"
+               class="{{ request()->is('ventas/crear') ? 'activo' : '' }}">
+                Nueva venta
+            </a>
 
-        <a href="/ventas"
-           class="{{ request()->is('ventas') && !request()->is('ventas/crear') ? 'activo' : '' }}">
-            Ventas
-        </a>
+            <a href="/ventas"
+               class="{{ request()->is('ventas') && !request()->is('ventas/crear') ? 'activo' : '' }}">
+                Ventas
+            </a>
 
-        <a href="/inventario/capturar"
-           class="{{ request()->is('inventario/capturar') ? 'activo' : '' }}">
-            Agregar inventario
-        </a>
+            <a href="/inventario/capturar"
+               class="{{ request()->is('inventario/capturar') ? 'activo' : '' }}">
+                Agregar inventario
+            </a>
 
-        <a href="/inventario/crear-manual"
-           class="{{ request()->is('inventario/crear-manual') ? 'activo' : '' }}">
-            Crear manual
-        </a>
+            <a href="/inventario/crear-manual"
+               class="{{ request()->is('inventario/crear-manual') ? 'activo' : '' }}">
+                Crear manual
+            </a>
 
-        <a href="/clientes"
-           class="{{ request()->is('clientes*') ? 'activo' : '' }}">
-            Clientes
-        </a>
+            <a href="/clientes"
+               class="{{ request()->is('clientes*') ? 'activo' : '' }}">
+                Clientes
+            </a>
 
-        {{-- Solo dueno y superadmin --}}
-        @if(auth()->user()->rol === 'dueno' || auth()->user()->rol === 'superadmin')
-            <a href="/inventario"
-               class="{{ request()->is('inventario') && !request()->is('inventario/capturar') && !request()->is('inventario/crear-manual') ? 'activo' : '' }}">
-                Inventario
-            </a>
-            <a href="/proveedores"
-               class="{{ request()->is('proveedores*') ? 'activo' : '' }}">
-                Proveedores
-            </a>
-            <a href="/gastos"
-               class="{{ request()->is('gastos*') ? 'activo' : '' }}">
-                Gastos
-            </a>
-            <a href="/usuarios"
-               class="{{ request()->is('usuarios*') ? 'activo' : '' }}">
-                Usuarios
-            </a>
-            <a href="/reportes"
-               class="{{ request()->is('reportes*') ? 'activo' : '' }}">
-                Reportes
-            </a>
-            <a href="/ferreteria/perfil"
-               class="{{ request()->is('ferreteria/perfil') ? 'activo' : '' }}">
-                Mi ferreteria
-            </a>
-            <a href="/ferreteria/suscripcion"
-               class="{{ request()->is('ferreteria/suscripcion') ? 'activo' : '' }}">
-                Suscripcion
-            </a>
+            {{-- Solo dueno --}}
+            @if(auth()->user()->rol === 'dueno')
+                <a href="/inventario"
+                   class="{{ request()->is('inventario') && !request()->is('inventario/capturar') && !request()->is('inventario/crear-manual') ? 'activo' : '' }}">
+                    Inventario
+                </a>
+                <a href="/proveedores"
+                   class="{{ request()->is('proveedores*') ? 'activo' : '' }}">
+                    Proveedores
+                </a>
+                <a href="/gastos"
+                   class="{{ request()->is('gastos*') ? 'activo' : '' }}">
+                    Gastos
+                </a>
+                <a href="/usuarios"
+                   class="{{ request()->is('usuarios*') ? 'activo' : '' }}">
+                    Usuarios
+                </a>
+                <a href="/reportes"
+                   class="{{ request()->is('reportes*') ? 'activo' : '' }}">
+                    Reportes
+                </a>
+                <a href="/ferreteria/perfil"
+                   class="{{ request()->is('ferreteria/perfil') ? 'activo' : '' }}">
+                    Mi ferreteria
+                </a>
+                <a href="/ferreteria/suscripcion"
+                   class="{{ request()->is('ferreteria/suscripcion') ? 'activo' : '' }}">
+                    Suscripcion
+                </a>
+            @endif
+
         @endif
 
         <form method="POST" action="/logout" style="margin-left:auto;flex-shrink:0;">
