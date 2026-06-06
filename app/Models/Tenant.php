@@ -18,14 +18,13 @@ class Tenant extends Model
     ];
 
     protected $casts = [
-        'activo'                 => 'boolean',
-        'facturacion_electronica'=> 'boolean',
-        'trial_ends_at'          => 'datetime',
-        'subscription_ends_at'   => 'datetime',
-        'subscription_price'     => 'integer',
+        'activo'                  => 'boolean',
+        'facturacion_electronica' => 'boolean',
+        'trial_ends_at'           => 'datetime',
+        'subscription_ends_at'    => 'datetime',
+        'subscription_price'      => 'integer',
     ];
 
-    // Verifica si el tenant tiene acceso activo
     public function tieneAcceso(): bool
     {
         return match($this->subscription_status) {
@@ -35,7 +34,6 @@ class Tenant extends Model
         };
     }
 
-    // Días restantes del trial o suscripción
     public function diasRestantes(): int
     {
         $fecha = $this->subscription_status === 'trial'
@@ -50,4 +48,5 @@ class Tenant extends Model
     public function clientes()    { return $this->hasMany(Cliente::class); }
     public function proveedores() { return $this->hasMany(Proveedor::class); }
     public function ventas()      { return $this->hasMany(Venta::class); }
+    public function usuarios()    { return $this->hasMany(User::class); }
 }
