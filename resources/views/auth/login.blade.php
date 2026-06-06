@@ -109,13 +109,59 @@
         .btn-login:hover { background: #222; }
 
         .footer-login {
-            margin-top: 28px;
+            margin-top: 24px;
+            width: 100%;
+        }
+
+        .footer-divider {
+            width: 100%;
+            height: 1px;
+            background: #f0f0f0;
+            margin-bottom: 16px;
+        }
+
+        .footer-demo {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background: #99CF8E;
+            color: #000;
+            text-align: center;
+            border-radius: 10px;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            transition: background .2s;
+        }
+
+        .footer-demo:hover { background: #7db872; }
+
+        .footer-planes {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background: #f5f5f5;
+            color: #000;
+            text-align: center;
+            border-radius: 10px;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: bold;
+            margin-bottom: 12px;
+            border: 1px solid #e0e0e0;
+            transition: background .2s;
+        }
+
+        .footer-planes:hover { background: #eee; }
+
+        .footer-contacto {
             text-align: center;
             font-size: 11px;
             color: #bbb;
         }
 
-        .footer-login a {
+        .footer-contacto a {
             color: #99CF8E;
             text-decoration: none;
             font-weight: bold;
@@ -164,7 +210,6 @@
             z-index: 1;
         }
 
-        /* Carrusel */
         .carrusel-wrapper {
             width: 100%;
             max-width: 680px;
@@ -215,7 +260,6 @@
             transform: scale(1.3);
         }
 
-        /* Features */
         .features {
             display: flex;
             gap: 16px;
@@ -236,7 +280,6 @@
         .feature .icono { font-size: 22px; margin-bottom: 4px; }
         .feature .texto { font-size: 11px; color: #CEC8BF; line-height: 1.4; }
 
-        /* Badge Gemini */
         .powered-badge {
             display: flex;
             align-items: center;
@@ -279,11 +322,11 @@
         @endphp
         <div class="version-badge">v {{ $major }}.{{ $minor }}.{{ $patch }} · {{ date('Y') }}</div>
 
-        <div class="slogan">Tu éxito es nuestro objetivo</div>
+        <div class="slogan">Tu exito es nuestro objetivo</div>
 
         <div class="divider"></div>
 
-        <div class="form-titulo">Iniciar sesión</div>
+        <div class="form-titulo">Iniciar sesion</div>
 
         @if($errors->any())
         <div class="error">{{ $errors->first() }}</div>
@@ -292,12 +335,12 @@
         <form method="POST" action="/login" style="width:100%">
             @csrf
             <div class="campo">
-                <label>Correo electrónico</label>
+                <label>Correo electronico</label>
                 <input type="email" name="email" value="{{ old('email') }}"
                        placeholder="tu@correo.com" required autofocus>
             </div>
             <div class="campo">
-                <label>Contraseña</label>
+                <label>Contrasena</label>
                 <input type="password" name="password"
                        placeholder="••••••••" required>
             </div>
@@ -305,23 +348,31 @@
         </form>
 
         <div class="footer-login">
-    ¿Necesitas acceso?
-    <a href="https://www.avanzas.digital/index.html" target="_blank">
-        Contacta a Avanzas Digital
-    </a>
-    <br>
-    <a href="/trial" style="color:#000;font-weight:bold;">
-        Solicitar demo gratuito de 30 dias
-    </a>
-    </div>
+            <div class="footer-divider"></div>
+
+            <a href="/trial" class="footer-demo">
+                Solicitar demo gratuito — 30 dias gratis
+            </a>
+
+            <a href="/planes" class="footer-planes">
+                Ver todos los planes y precios
+            </a>
+
+            <div class="footer-contacto">
+                Necesitas ayuda?
+                <a href="https://www.avanzas.digital/index.html" target="_blank">
+                    Contacta a Avanzas Digital
+                </a>
+            </div>
+        </div>
     </div>
 
     <!-- Panel derecho — Carrusel -->
     <div class="panel-video">
 
         <div class="video-titulo">
-            El POS más simple para<br>
-            <span>ferreterías de barrio</span>
+            El POS mas simple para<br>
+            <span>ferreterias de barrio</span>
         </div>
 
         <div class="video-subtitulo">
@@ -355,11 +406,11 @@
             </div>
             <div class="feature">
                 <div class="icono">🖨</div>
-                <div class="texto">Tickets<br>térmicos</div>
+                <div class="texto">Tickets<br>termicos</div>
             </div>
             <div class="feature">
                 <div class="icono">💳</div>
-                <div class="texto">Control de<br>créditos</div>
+                <div class="texto">Control de<br>creditos</div>
             </div>
             <div class="feature">
                 <div class="icono">📊</div>
@@ -367,7 +418,7 @@
             </div>
             <div class="feature">
                 <div class="icono">📱</div>
-                <div class="texto">PWA<br>móvil</div>
+                <div class="texto">PWA<br>movil</div>
             </div>
         </div>
 
