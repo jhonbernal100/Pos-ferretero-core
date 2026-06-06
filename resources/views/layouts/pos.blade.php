@@ -97,53 +97,57 @@
 
     <div class="toolbar">
 
-        {{-- Común para todos los roles --}}
+        {{-- Comun para todos los roles --}}
         <a href="/ventas/crear"
            class="{{ request()->is('ventas/crear') ? 'activo' : '' }}">
-            🛒 Nueva venta
+            Nueva venta
         </a>
 
         <a href="/ventas"
            class="{{ request()->is('ventas') && !request()->is('ventas/crear') ? 'activo' : '' }}">
-            📋 Ventas
+            Ventas
         </a>
 
         <a href="/inventario/capturar"
            class="{{ request()->is('inventario/capturar') ? 'activo' : '' }}">
-            📷 Agregar inventario
+            Agregar inventario
         </a>
 
         <a href="/inventario/crear-manual"
            class="{{ request()->is('inventario/crear-manual') ? 'activo' : '' }}">
-            ➕ Crear manual
+            Crear manual
         </a>
 
         <a href="/clientes"
            class="{{ request()->is('clientes*') ? 'activo' : '' }}">
-            👥 Clientes
+            Clientes
         </a>
 
-        {{-- Solo dueño y superadmin --}}
+        {{-- Solo dueno y superadmin --}}
         @if(auth()->user()->rol === 'dueno' || auth()->user()->rol === 'superadmin')
             <a href="/inventario"
                class="{{ request()->is('inventario') && !request()->is('inventario/capturar') && !request()->is('inventario/crear-manual') ? 'activo' : '' }}">
-                📦 Inventario
+                Inventario
             </a>
             <a href="/proveedores"
                class="{{ request()->is('proveedores*') ? 'activo' : '' }}">
-                🚚 Proveedores
+                Proveedores
+            </a>
+            <a href="/gastos"
+               class="{{ request()->is('gastos*') ? 'activo' : '' }}">
+                Gastos
             </a>
             <a href="/reportes"
                class="{{ request()->is('reportes*') ? 'activo' : '' }}">
-                📊 Reportes
+                Reportes
             </a>
             <a href="/ferreteria/perfil"
                class="{{ request()->is('ferreteria/perfil') ? 'activo' : '' }}">
-                🏪 Mi ferretería
+                Mi ferreteria
             </a>
             <a href="/ferreteria/suscripcion"
                class="{{ request()->is('ferreteria/suscripcion') ? 'activo' : '' }}">
-                ⭐ Suscripción
+                Suscripcion
             </a>
         @endif
 
@@ -151,7 +155,7 @@
             @csrf
             <button type="submit"
                 style="background:#c00;color:#fff;border:none;padding:10px 16px;border-radius:6px;font-size:14px;cursor:pointer;white-space:nowrap;">
-                🚪 Salir
+                Salir
             </button>
         </form>
     </div>
@@ -161,7 +165,7 @@
         @php $dias = auth()->user()->tenant->diasRestantes(); @endphp
         @if($dias <= 7)
         <div class="alerta-trial">
-            ⚠️ Tu período de prueba vence en <strong>{{ $dias }} días</strong>.
+            Tu periodo de prueba vence en <strong>{{ $dias }} dias</strong>.
             <a href="/ferreteria/suscripcion">Contacta a Avanzas Digital para continuar</a>
         </div>
         @endif
@@ -176,7 +180,7 @@
         Sistema POS desarrollado por
         <a href="https://www.avanzas.digital/index.html" target="_blank" rel="noopener">Avanzas Digital</a>
         &nbsp;·&nbsp;
-        <a href="https://www.avanzas.digital/index.html" target="_blank" rel="noopener">¿Quieres este sistema? Contáctanos</a>
+        <a href="https://www.avanzas.digital/index.html" target="_blank" rel="noopener">Quieres este sistema? Contactanos</a>
     </footer>
 
     @yield('scripts')

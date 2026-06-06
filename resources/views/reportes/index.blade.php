@@ -102,6 +102,36 @@
     </a>
 </div>
 
+{{-- Estado financiero --}}
+<div style="background:#fff;border-radius:12px;padding:20px;border-left:4px solid #000;">
+    <div style="font-size:32px;margin-bottom:8px;">📊</div>
+    <h3 style="font-size:16px;margin-bottom:6px;">Estado financiero</h3>
+    <p style="font-size:13px;color:#888;margin-bottom:16px;">
+        P&G, cuentas por cobrar, cartera por antiguedad y valor de inventario.
+    </p>
+    <div style="display:flex;gap:8px;margin-bottom:8px;">
+        <select id="sel-mes-fin"
+            style="flex:1;padding:8px;font-size:14px;border:1px solid #ddd;border-radius:6px;">
+            @foreach(range(1,12) as $m)
+            <option value="{{ $m }}" {{ $m == now()->month ? 'selected' : '' }}>
+                {{ Carbon\Carbon::create()->month($m)->locale('es')->monthName }}
+            </option>
+            @endforeach
+        </select>
+        <select id="sel-anio-fin"
+            style="width:90px;padding:8px;font-size:14px;border:1px solid #ddd;border-radius:6px;">
+            @foreach(range(now()->year, now()->year - 2) as $a)
+            <option value="{{ $a }}">{{ $a }}</option>
+            @endforeach
+        </select>
+    </div>
+    <button onclick="generarFinanciero()"
+       style="width:100%;padding:10px;background:#000;color:#fff;border:none;border-radius:8px;font-size:14px;cursor:pointer;">
+        Generar PDF
+    </button>
+</div>
+
+
         {{-- Kardex --}}
         <div style="background:#fff;border-radius:12px;padding:20px;border-left:4px solid #CEC8BF;">
             <div style="font-size:32px;margin-bottom:8px;">📋</div>
@@ -138,6 +168,12 @@ function generarKardex() {
     const id = document.getElementById('sel-producto').value;
     if (!id) { alert('Selecciona un producto'); return; }
     window.open(`/reportes/kardex?producto_id=${id}`, '_blank');
+}
+
+function generarFinanciero() {
+    const mes  = document.getElementById('sel-mes-fin').value;
+    const anio = document.getElementById('sel-anio-fin').value;
+    window.open(`/reportes/estado-financiero?mes=${mes}&anio=${anio}`, '_blank');
 }
 </script>
 @endsection

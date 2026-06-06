@@ -10,7 +10,7 @@ use App\Http\Controllers\ClienteController;
 use App\Http\Controllers\TrialController;
 use App\Http\Controllers\DevolucionController;
 use App\Http\Controllers\ReporteController;
-
+use App\Http\Controllers\GastoController;
 
 Route::get('/', fn() => redirect('/login'));
 
@@ -25,8 +25,8 @@ Route::prefix('trial')->group(function () {
     Route::post('/confirmar',       [TrialController::class, 'confirmar'])->name('trial.confirmar');
     Route::post('/verificar',       [TrialController::class, 'verificar'])->name('trial.verificar');
     Route::post('/reenviar-codigo', [TrialController::class, 'reenviarCodigo'])->name('trial.reenviarCodigo');
-    Route::get('/paso2', fn() => view('trial.paso2'))->name('trial.paso2');
-    Route::get('/paso3', fn() => view('trial.paso3'))->name('trial.paso3');
+    Route::get('/paso2',            fn() => view('trial.paso2'))->name('trial.paso2');
+    Route::get('/paso3',            fn() => view('trial.paso3'))->name('trial.paso3');
 });
 
 Route::middleware('auth')->group(function () {
@@ -80,15 +80,23 @@ Route::middleware('auth')->group(function () {
         Route::post('/{cliente}/actualizar',    [ClienteController::class, 'actualizar'])->name('clientes.actualizar');
     });
 
+    Route::prefix('gastos')->group(function () {
+        Route::get('/',                    [GastoController::class, 'index'])->name('gastos.index');
+        Route::get('/crear',               [GastoController::class, 'crear'])->name('gastos.crear');
+        Route::post('/',                   [GastoController::class, 'store'])->name('gastos.store');
+        Route::delete('/{gasto}/eliminar', [GastoController::class, 'eliminar'])->name('gastos.eliminar');
+    });
+
     Route::prefix('reportes')->group(function () {
-        Route::get('/',              [ReporteController::class, 'index'])->name('reportes.index');
-        Route::get('/inventario',    [ReporteController::class, 'inventario'])->name('reportes.inventario');
-        Route::get('/stock-bajo',    [ReporteController::class, 'stockBajo'])->name('reportes.stockBajo');
-        Route::get('/ventas-dia',    [ReporteController::class, 'ventasDia'])->name('reportes.ventasDia');
-        Route::get('/ventas-semana', [ReporteController::class, 'ventasSemana'])->name('reportes.ventasSemana');
-        Route::get('/ventas-mes',    [ReporteController::class, 'ventasMes'])->name('reportes.ventasMes');
-        Route::get('/kardex',        [ReporteController::class, 'kardex'])->name('reportes.kardex');
-        Route::get('/creditos', [ReporteController::class, 'creditos'])->name('reportes.creditos');
+        Route::get('/',                  [ReporteController::class, 'index'])->name('reportes.index');
+        Route::get('/inventario',        [ReporteController::class, 'inventario'])->name('reportes.inventario');
+        Route::get('/stock-bajo',        [ReporteController::class, 'stockBajo'])->name('reportes.stockBajo');
+        Route::get('/ventas-dia',        [ReporteController::class, 'ventasDia'])->name('reportes.ventasDia');
+        Route::get('/ventas-semana',     [ReporteController::class, 'ventasSemana'])->name('reportes.ventasSemana');
+        Route::get('/ventas-mes',        [ReporteController::class, 'ventasMes'])->name('reportes.ventasMes');
+        Route::get('/kardex',            [ReporteController::class, 'kardex'])->name('reportes.kardex');
+        Route::get('/creditos',          [ReporteController::class, 'creditos'])->name('reportes.creditos');
+        Route::get('/estado-financiero', [ReporteController::class, 'estadoFinanciero'])->name('reportes.estadoFinanciero');
     });
 
 });
