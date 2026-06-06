@@ -87,7 +87,7 @@
 
     <nav class="navbar">
         <a href="/ventas/crear" class="navbar-brand">
-            🔧 POS Ferretero
+            POS Ferretero
         </a>
         <div class="navbar-user">
             {{ auth()->user()->name ?? 'Usuario' }}
@@ -96,6 +96,15 @@
     </nav>
 
     <div class="toolbar">
+
+        {{-- Solo superadmin --}}
+        @if(auth()->user()->rol === 'superadmin')
+            <a href="/admin/dashboard"
+               class="{{ request()->is('admin*') ? 'activo' : '' }}"
+               style="background:#99CF8E;color:#000;font-weight:bold;border-color:#99CF8E;">
+                Panel Admin
+            </a>
+        @endif
 
         {{-- Comun para todos los roles --}}
         <a href="/ventas/crear"

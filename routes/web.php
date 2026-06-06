@@ -13,6 +13,7 @@ use App\Http\Controllers\ReporteController;
 use App\Http\Controllers\GastoController;
 use App\Http\Controllers\UsuarioController;
 use App\Http\Controllers\PlanesController;
+use App\Http\Controllers\Admin\DashboardController;
 
 Route::get('/', fn() => redirect('/login'));
 
@@ -114,7 +115,13 @@ Route::middleware('auth')->group(function () {
         Route::delete('/{usuario}/eliminar',    [UsuarioController::class, 'eliminar'])->name('usuarios.eliminar');
     });
 
-
+    Route::prefix('admin')->middleware('auth')->group(function () {
+        Route::get('/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
+        Route::get('/ferreterias/{tenant}', [DashboardController::class, 'ferreteria'])->name('admin.ferreteria');
+        Route::post('/ferreterias/{tenant}/ampliar-trial', [DashboardController::class, 'ampliarTrial'])->name('admin.ampliarTrial');
+        Route::post('/ferreterias/{tenant}/cambiar-plan', [DashboardController::class, 'cambiarPlan'])->name('admin.cambiarPlan');
+        Route::delete('/ferreterias/{tenant}/eliminar', [DashboardController::class, 'eliminarFerreteria'])->name('admin.eliminarFerreteria');
+    });
 
 
 });
