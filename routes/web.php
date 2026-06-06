@@ -11,6 +11,7 @@ use App\Http\Controllers\TrialController;
 use App\Http\Controllers\DevolucionController;
 use App\Http\Controllers\ReporteController;
 use App\Http\Controllers\GastoController;
+use App\Http\Controllers\UsuarioController;
 
 Route::get('/', fn() => redirect('/login'));
 
@@ -98,5 +99,14 @@ Route::middleware('auth')->group(function () {
         Route::get('/creditos',          [ReporteController::class, 'creditos'])->name('reportes.creditos');
         Route::get('/estado-financiero', [ReporteController::class, 'estadoFinanciero'])->name('reportes.estadoFinanciero');
     });
+
+    Route::prefix('usuarios')->group(function () {
+    Route::get('/',                        [UsuarioController::class, 'index'])->name('usuarios.index');
+    Route::get('/crear',                   [UsuarioController::class, 'crear'])->name('usuarios.crear');
+    Route::post('/',                       [UsuarioController::class, 'store'])->name('usuarios.store');
+    Route::post('/{usuario}/toggle-activo',[UsuarioController::class, 'toggleActivo'])->name('usuarios.toggleActivo');
+    Route::delete('/{usuario}/eliminar',   [UsuarioController::class, 'eliminar'])->name('usuarios.eliminar');
+    Route::post('/{usuario}/password',     [UsuarioController::class, 'cambiarPassword'])->name('usuarios.password');
+});
 
 });

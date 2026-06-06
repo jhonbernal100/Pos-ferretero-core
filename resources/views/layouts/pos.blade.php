@@ -137,6 +137,10 @@
                class="{{ request()->is('gastos*') ? 'activo' : '' }}">
                 Gastos
             </a>
+            <a href="/usuarios"
+               class="{{ request()->is('usuarios*') ? 'activo' : '' }}">
+                Usuarios
+            </a>
             <a href="/reportes"
                class="{{ request()->is('reportes*') ? 'activo' : '' }}">
                 Reportes
