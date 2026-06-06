@@ -50,6 +50,10 @@
                     <td style="padding:12px;text-align:center;">
                         @if($usuario->id !== auth()->id())
                         <div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap;">
+                            <a href="/usuarios/{{ $usuario->id }}/editar"
+                                style="padding:6px 10px;background:#000;color:#fff;border-radius:6px;font-size:11px;text-decoration:none;">
+                                Editar
+                            </a>
                             <button onclick="toggleActivo({{ $usuario->id }})"
                                 style="padding:6px 10px;background:#856404;color:#fff;border:none;border-radius:6px;font-size:11px;cursor:pointer;">
                                 Activar/Desactivar

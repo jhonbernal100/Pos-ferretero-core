@@ -101,12 +101,13 @@ Route::middleware('auth')->group(function () {
     });
 
     Route::prefix('usuarios')->group(function () {
-    Route::get('/',                        [UsuarioController::class, 'index'])->name('usuarios.index');
-    Route::get('/crear',                   [UsuarioController::class, 'crear'])->name('usuarios.crear');
-    Route::post('/',                       [UsuarioController::class, 'store'])->name('usuarios.store');
-    Route::post('/{usuario}/toggle-activo',[UsuarioController::class, 'toggleActivo'])->name('usuarios.toggleActivo');
-    Route::delete('/{usuario}/eliminar',   [UsuarioController::class, 'eliminar'])->name('usuarios.eliminar');
-    Route::post('/{usuario}/password',     [UsuarioController::class, 'cambiarPassword'])->name('usuarios.password');
-});
+        Route::get('/',                         [UsuarioController::class, 'index'])->name('usuarios.index');
+        Route::get('/crear',                    [UsuarioController::class, 'crear'])->name('usuarios.crear');
+        Route::post('/',                        [UsuarioController::class, 'store'])->name('usuarios.store');
+        Route::get('/{usuario}/editar',         [UsuarioController::class, 'editar'])->name('usuarios.editar');
+        Route::post('/{usuario}/actualizar',    [UsuarioController::class, 'actualizar'])->name('usuarios.actualizar');
+        Route::post('/{usuario}/toggle-activo', [UsuarioController::class, 'toggleActivo'])->name('usuarios.toggleActivo');
+        Route::delete('/{usuario}/eliminar',    [UsuarioController::class, 'eliminar'])->name('usuarios.eliminar');
+    });
 
 });

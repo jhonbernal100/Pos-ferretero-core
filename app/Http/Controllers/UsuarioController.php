@@ -34,7 +34,7 @@ class UsuarioController extends Controller
 
         $password = Str::random(10);
 
-        $usuario = User::create([
+        User::create([
             'name'      => $request->name,
             'email'     => $request->email,
             'password'  => bcrypt($password),
@@ -43,7 +43,6 @@ class UsuarioController extends Controller
             'activo'    => true,
         ]);
 
-        // Enviar credenciales por correo
         Mail::raw(
             "Hola {$request->name},\n\n" .
             "El administrador de " . auth()->user()->tenant->nombre . " te ha creado una cuenta en POS Ferretero.\n\n" .
@@ -64,14 +63,42 @@ class UsuarioController extends Controller
         ]);
     }
 
-    public function toggleActivo(User $usuario)
+    public function editar(User $usuario)
     {
-        // Verificar que el usuario pertenece al mismo tenant
-        if ($usuario->tenant_id !== session('tenant_id')) {
-            return response()->json(['success' => false, 'mensaje' => 'No autorizado'], 403);
+        $this->verificarAcceso($usuario);
+        return view('usuarios.editar', compact('usuario'));
+    }
+
+    public function actualizar(Request $request, User $usuario)
+    {
+        $this->verificarAcceso($usuario);
+
+        $request->validate([
+            'name'  => 'required|string|max:191',
+            'email' => 'required|email|unique:users,email,' . $usuario->id,
+            'rol'   => 'required|in:dueno,auxiliar',
+        ]);
+
+        $usuario->update([
+            'name'  => $request->name,
+            'email' => $request->email,
+            'rol'   => $request->rol,
+        ]);
+
+        if ($request->password) {
+            $usuario->update(['password' => bcrypt($request->password)]);
         }
 
-        // No permitir desactivar al propio usuario
+        return response()->json([
+            'success' => true,
+            'mensaje' => 'Usuario actualizado correctamente',
+        ]);
+    }
+
+    public function toggleActivo(User $usuario)
+    {
+        $this->verificarAcceso($usuario);
+
         if ($usuario->id === auth()->id()) {
             return response()->json(['success' => false, 'mensaje' => 'No puedes desactivarte a ti mismo'], 422);
         }
@@ -87,9 +114,7 @@ class UsuarioController extends Controller
 
     public function eliminar(User $usuario)
     {
-        if ($usuario->tenant_id !== session('tenant_id')) {
-            return response()->json(['success' => false, 'mensaje' => 'No autorizado'], 403);
-        }
+        $this->verificarAcceso($usuario);
 
         if ($usuario->id === auth()->id()) {
             return response()->json(['success' => false, 'mensaje' => 'No puedes eliminarte a ti mismo'], 422);
@@ -103,23 +128,13 @@ class UsuarioController extends Controller
         ]);
     }
 
-    public function cambiarPassword(Request $request, User $usuario)
+    // Verifica que el usuario pertenece al tenant actual
+    private function verificarAcceso(User $usuario)
     {
-        if ($usuario->tenant_id !== session('tenant_id')) {
-            return response()->json(['success' => false, 'mensaje' => 'No autorizado'], 403);
+        $tenantId = session('tenant_id') ?? auth()->user()->tenant_id;
+
+        if ((int)$usuario->tenant_id !== (int)$tenantId) {
+            abort(403, 'No autorizado');
         }
-
-        $request->validate([
-            'password' => 'required|string|min:8',
-        ]);
-
-        $usuario->update([
-            'password' => bcrypt($request->password),
-        ]);
-
-        return response()->json([
-            'success' => true,
-            'mensaje' => 'Contrasena actualizada correctamente',
-        ]);
     }
 }
