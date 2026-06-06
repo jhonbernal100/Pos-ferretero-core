@@ -12,15 +12,19 @@ class IdentifyTenant
     public function handle(Request $request, Closure $next): Response
     {
         // Rutas del admin y trial no requieren tenant
-        if ($request->is('admin*') || $request->is('trial*')) {
+        if ($request->is('admin*') || $request->is('trial*') || $request->is('planes*')) {
             return $next($request);
         }
 
         if (auth()->check()) {
             $user = auth()->user();
 
-            // Superadmin accede sin ferretería
+            // Superadmin — solo puede acceder al panel admin
             if ($user->rol === 'superadmin') {
+                // Si intenta acceder a rutas del POS lo redirigimos al dashboard
+                if (!$request->is('admin*') && !$request->is('logout')) {
+                    return redirect('/admin/dashboard');
+                }
                 config(['app.current_tenant_id' => null]);
                 return $next($request);
             }
@@ -37,7 +41,7 @@ class IdentifyTenant
 
             // Usuario autenticado sin acceso
             return response()->view('errors.suscripcion-vencida', [
-                'tenant' => $user->tenant ?? new Tenant(['nombre' => 'tu ferretería'])
+                'tenant' => $user->tenant ?? new Tenant(['nombre' => 'tu ferreteria'])
             ], 403);
         }
 

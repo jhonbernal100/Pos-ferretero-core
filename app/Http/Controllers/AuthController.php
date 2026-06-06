@@ -10,7 +10,9 @@ class AuthController extends Controller
     public function showLogin()
     {
         if (Auth::check()) {
-            return redirect('/ventas/crear');
+            return Auth::user()->rol === 'superadmin'
+                ? redirect('/admin/dashboard')
+                : redirect('/ventas/crear');
         }
         return view('auth.login');
     }
@@ -28,7 +30,10 @@ class AuthController extends Controller
             'activo'   => true,
         ], $request->remember)) {
             $request->session()->regenerate();
-            return redirect('/ventas/crear');
+
+            return Auth::user()->rol === 'superadmin'
+                ? redirect('/admin/dashboard')
+                : redirect('/ventas/crear');
         }
 
         return back()->withErrors([
