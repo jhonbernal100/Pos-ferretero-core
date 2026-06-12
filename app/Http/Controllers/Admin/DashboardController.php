@@ -22,16 +22,15 @@ class DashboardController extends Controller
 
     // Ingresos reales por suscripciones del mes actual
     $ingresosSuscripciones = Tenant::where('subscription_status', 'activa')
-        ->whereMonth('updated_at', now()->month)
-        ->whereYear('updated_at', now()->year)
-        ->get()
-        ->sum(function ($tenant) {
-            return match($tenant->subscription_plan) {
-                'anual'      => 35000,
-                'trimestral' => 45000,
-                default      => 0,
-            };
-        });
+    ->whereYear('updated_at', now()->year)
+    ->get()
+    ->sum(function ($tenant) {
+    return match($tenant->subscription_plan) {
+        'anual'      => 420000,  // $35,000 x 12 meses
+        'trimestral' => 135000,  // $45,000 x 3 meses
+        default      => 0,
+    };
+    });
 
     $trialsProximosVencer = Tenant::where('subscription_status', 'trial')
         ->whereNotNull('trial_ends_at')
