@@ -33,18 +33,14 @@
 
         .navbar-actions a:hover { background: #222; color: #fff; }
 
-        .container { max-width: 1300px; margin: 24px auto; padding: 0 20px; }
+        .container { max-width: 1400px; margin: 24px auto; padding: 0 20px; }
 
         .page-title {
             font-size: 22px;
             font-weight: bold;
             margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
         }
 
-        /* METRICAS */
         .metricas {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -61,14 +57,13 @@
         }
 
         .metrica-card .valor {
-            font-size: 32px;
+            font-size: 28px;
             font-weight: bold;
             margin-bottom: 4px;
         }
 
         .metrica-card .label { font-size: 12px; color: #888; }
 
-        /* ALERTAS */
         .alerta-vencimiento {
             background: #fff3cd;
             border: 1px solid #ffc107;
@@ -90,7 +85,6 @@
 
         .alerta-item:last-child { border-bottom: none; }
 
-        /* TABLA FERRETERIAS */
         .seccion { background: #fff; border-radius: 12px; overflow: hidden; margin-bottom: 24px; }
 
         .seccion-header {
@@ -118,8 +112,9 @@
             background: #000;
             color: #fff;
             padding: 10px 14px;
-            font-size: 12px;
+            font-size: 11px;
             text-align: left;
+            white-space: nowrap;
         }
 
         td {
@@ -139,10 +134,10 @@
             font-weight: bold;
         }
 
-        .badge-trial    { background: #fff3cd; color: #856404; }
-        .badge-activa   { background: #d4edda; color: #155724; }
-        .badge-vencida  { background: #f8d7da; color: #721c24; }
-        .badge-suspendida { background: #f0f0f0; color: #555; }
+        .badge-trial     { background: #fff3cd; color: #856404; }
+        .badge-activa    { background: #d4edda; color: #155724; }
+        .badge-vencida   { background: #f8d7da; color: #721c24; }
+        .badge-suspendida{ background: #f0f0f0; color: #555; }
 
         .btn-sm {
             padding: 5px 10px;
@@ -152,14 +147,13 @@
             cursor: pointer;
             text-decoration: none;
             display: inline-block;
+            white-space: nowrap;
         }
 
-        .btn-ver      { background: #000; color: #fff; }
         .btn-ampliar  { background: #856404; color: #fff; }
         .btn-plan     { background: #4285F4; color: #fff; }
         .btn-eliminar { background: #c00; color: #fff; }
 
-        /* MODAL */
         .modal-overlay {
             display: none;
             position: fixed;
@@ -196,40 +190,27 @@
 
         .modal-btns { display: flex; gap: 8px; margin-top: 16px; }
         .modal-btn-ok {
-            flex: 1;
-            padding: 10px;
-            background: #000;
-            color: #fff;
-            border: none;
-            border-radius: 8px;
-            font-size: 14px;
-            cursor: pointer;
+            flex: 1; padding: 10px; background: #000; color: #fff;
+            border: none; border-radius: 8px; font-size: 14px; cursor: pointer;
         }
-
         .modal-btn-cancel {
-            flex: 1;
-            padding: 10px;
-            background: #f0f0f0;
-            color: #000;
-            border: none;
-            border-radius: 8px;
-            font-size: 14px;
-            cursor: pointer;
+            flex: 1; padding: 10px; background: #f0f0f0; color: #000;
+            border: none; border-radius: 8px; font-size: 14px; cursor: pointer;
         }
 
         .mensaje-flash {
             display: none;
             position: fixed;
-            top: 20px;
-            right: 20px;
-            background: #d4edda;
-            color: #155724;
-            padding: 12px 20px;
-            border-radius: 8px;
-            font-size: 13px;
-            z-index: 9999;
+            top: 20px; right: 20px;
+            background: #d4edda; color: #155724;
+            padding: 12px 20px; border-radius: 8px;
+            font-size: 13px; z-index: 9999;
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
+
+        .sku-alto  { color: #155724; font-weight: bold; }
+        .sku-medio { color: #856404; font-weight: bold; }
+        .sku-bajo  { color: #000; }
     </style>
 </head>
 <body>
@@ -238,7 +219,6 @@
     <div class="navbar-brand">Avanzas Digital — Panel Admin</div>
     <div class="navbar-actions">
         <span class="navbar-user">{{ auth()->user()->name }}</span>
-        <a href="/ventas/crear">Ir al POS</a>
         <a href="/logout" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
             Salir
         </a>
@@ -274,11 +254,11 @@
             <div class="valor">{{ $totalUsuarios }}</div>
             <div class="label">Usuarios totales</div>
         </div>
-        <div class="metrica-card">
+        <div class="metrica-card" style="border-top:3px solid #99CF8E;">
             <div class="valor" style="color:#155724;">
-                $ {{ number_format($ventasMes, 0, ',', '.') }}
+                $ {{ number_format($ingresosSuscripciones, 0, ',', '.') }}
             </div>
-            <div class="label">Ventas plataforma este mes</div>
+            <div class="label">Ingresos suscripciones este mes</div>
         </div>
     </div>
 
@@ -305,6 +285,7 @@
                    placeholder="Buscar ferreteria..."
                    oninput="filtrar(this.value)">
         </div>
+        <div style="overflow-x:auto;">
         <table>
             <thead>
                 <tr>
@@ -312,8 +293,10 @@
                     <th>Ferreteria</th>
                     <th>NIT</th>
                     <th>Ciudad</th>
-                    <th>Plan</th>
+                    <th>Estado</th>
+                    <th>Tipo plan</th>
                     <th>Dias restantes</th>
+                    <th>SKUs</th>
                     <th>Usuarios</th>
                     <th>Registro</th>
                     <th>Acciones</th>
@@ -336,7 +319,20 @@
                             {{ strtoupper($tenant->subscription_status) }}
                         </span>
                     </td>
-                    <td>
+                    <td style="text-align:center;">
+                        @if($tenant->subscription_plan === 'anual')
+                            <span style="background:#000;color:#fff;padding:3px 8px;border-radius:10px;font-size:10px;font-weight:bold;">
+                                ANUAL
+                            </span>
+                        @elseif($tenant->subscription_plan === 'trimestral')
+                            <span style="background:#4285F4;color:#fff;padding:3px 8px;border-radius:10px;font-size:10px;font-weight:bold;">
+                                TRIMESTRAL
+                            </span>
+                        @else
+                            <span style="color:#aaa;font-size:11px;">—</span>
+                        @endif
+                    </td>
+                    <td style="text-align:center;">
                         @if($tenant->dias_restantes !== null)
                             <span style="color:{{ $tenant->dias_restantes <= 7 ? '#c00' : '#155724' }};font-weight:bold;">
                                 {{ $tenant->dias_restantes }} dias
@@ -344,6 +340,13 @@
                         @else
                             <span style="color:#aaa;">—</span>
                         @endif
+                    </td>
+                    <td style="text-align:center;">
+                        <span class="{{ $tenant->total_skus > 200 ? 'sku-alto' : ($tenant->total_skus > 50 ? 'sku-medio' : 'sku-bajo') }}"
+                              style="font-size:15px;">
+                            {{ $tenant->total_skus }}
+                        </span>
+                        <div style="font-size:10px;color:#aaa;">productos</div>
                     </td>
                     <td style="text-align:center;">{{ $tenant->usuarios->count() }}</td>
                     <td>{{ $tenant->created_at->format('d/m/Y') }}</td>
@@ -366,13 +369,14 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="9" style="text-align:center;padding:24px;color:#999;">
+                    <td colspan="11" style="text-align:center;padding:24px;color:#999;">
                         No hay ferreterias registradas
                     </td>
                 </tr>
                 @endforelse
             </tbody>
         </table>
+        </div>
     </div>
 
 </div>
@@ -410,8 +414,8 @@
         <div class="modal-campo">
             <label>Meses de suscripcion (si es activa)</label>
             <select id="input-meses">
-                <option value="3">3 meses — Trimestral</option>
-                <option value="12">12 meses — Anual</option>
+                <option value="3">3 meses — Trimestral $45,000/mes</option>
+                <option value="12">12 meses — Anual $35,000/mes</option>
             </select>
         </div>
         <div class="modal-btns">
@@ -504,8 +508,8 @@ async function eliminar(id, nombre) {
 
 function mostrarFlash(msg) {
     const el = document.getElementById('flash');
-    el.textContent     = msg;
-    el.style.display   = 'block';
+    el.textContent   = msg;
+    el.style.display = 'block';
     setTimeout(() => el.style.display = 'none', 3000);
 }
 </script>

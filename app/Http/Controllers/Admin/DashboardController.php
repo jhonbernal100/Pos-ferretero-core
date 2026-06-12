@@ -13,55 +13,66 @@ use Illuminate\Http\Request;
 class DashboardController extends Controller
 {
     public function index()
-    {
-        $totalFerreterias    = Tenant::count();
-        $ferreteriasTrial    = Tenant::where('subscription_status', 'trial')->count();
-        $ferreteriasActivas  = Tenant::where('subscription_status', 'activa')->count();
-        $ferreteriasVencidas = Tenant::where('subscription_status', 'vencida')->count();
-        $totalUsuarios       = User::where('rol', '!=', 'superadmin')->count();
+{
+    $totalFerreterias    = Tenant::count();
+    $ferreteriasTrial    = Tenant::where('subscription_status', 'trial')->count();
+    $ferreteriasActivas  = Tenant::where('subscription_status', 'activa')->count();
+    $ferreteriasVencidas = Tenant::where('subscription_status', 'vencida')->count();
+    $totalUsuarios       = User::where('rol', '!=', 'superadmin')->count();
 
-        $trialsProximosVencer = Tenant::where('subscription_status', 'trial')
-            ->whereNotNull('trial_ends_at')
-            ->where('trial_ends_at', '>=', now())
-            ->where('trial_ends_at', '<=', now()->addDays(7))
-            ->orderBy('trial_ends_at')
-            ->get();
+    // Ingresos reales por suscripciones del mes actual
+    $ingresosSuscripciones = Tenant::where('subscription_status', 'activa')
+        ->whereMonth('updated_at', now()->month)
+        ->whereYear('updated_at', now()->year)
+        ->get()
+        ->sum(function ($tenant) {
+            return match($tenant->subscription_plan) {
+                'anual'      => 35000,
+                'trimestral' => 45000,
+                default      => 0,
+            };
+        });
 
-        $ferreteriasRecientes = Tenant::with('usuarios')
-            ->orderByDesc('created_at')
-            ->limit(5)
-            ->get();
+    $trialsProximosVencer = Tenant::where('subscription_status', 'trial')
+        ->whereNotNull('trial_ends_at')
+        ->where('trial_ends_at', '>=', now())
+        ->where('trial_ends_at', '<=', now()->addDays(7))
+        ->orderBy('trial_ends_at')
+        ->get();
 
-        $trialsPendientes = TrialRequest::where('estado', 'pendiente')
-            ->orderByDesc('created_at')
-            ->limit(5)
-            ->get();
+    $ferreteriasRecientes = Tenant::with('usuarios')
+        ->orderByDesc('created_at')
+        ->limit(5)
+        ->get();
 
-        $ventasMes = Venta::whereMonth('created_at', now()->month)
-            ->whereYear('created_at', now()->year)
-            ->where('estado', 'completada')
-            ->sum('total');
+    $trialsPendientes = TrialRequest::where('estado', 'pendiente')
+        ->orderByDesc('created_at')
+        ->limit(5)
+        ->get();
 
-        $ferreterias = Tenant::with('usuarios')
-            ->orderByDesc('created_at')
-            ->get()
-            ->map(function ($tenant) {
-                $tenant->dias_restantes = null;
+    $ferreterias = Tenant::with('usuarios')
+        ->orderByDesc('created_at')
+        ->get()
+        ->map(function ($tenant) {
+            $tenant->dias_restantes = null;
+            $tenant->total_skus = \App\Models\Producto::where('tenant_id', $tenant->id)
+                ->where('activo', true)
+                ->count();
 
-                if ($tenant->subscription_status === 'trial' && $tenant->trial_ends_at) {
-                    $tenant->dias_restantes = max(0, now()->diffInDays($tenant->trial_ends_at, false));
-                } elseif ($tenant->subscription_status === 'activa' && $tenant->subscription_ends_at) {
-                    $tenant->dias_restantes = max(0, now()->diffInDays($tenant->subscription_ends_at, false));
-                }
+            if ($tenant->subscription_status === 'trial' && $tenant->trial_ends_at) {
+                $tenant->dias_restantes = max(0, now()->diffInDays($tenant->trial_ends_at, false));
+            } elseif ($tenant->subscription_status === 'activa' && $tenant->subscription_ends_at) {
+                $tenant->dias_restantes = max(0, now()->diffInDays($tenant->subscription_ends_at, false));
+            }
 
-                return $tenant;
-            });
+            return $tenant;
+        });
 
-        return view('admin.dashboard', compact(
-            'totalFerreterias', 'ferreteriasTrial', 'ferreteriasActivas',
-            'ferreteriasVencidas', 'totalUsuarios', 'trialsProximosVencer',
-            'ferreteriasRecientes', 'trialsPendientes', 'ventasMes', 'ferreterias'
-        ));
+    return view('admin.dashboard', compact(
+        'totalFerreterias', 'ferreteriasTrial', 'ferreteriasActivas',
+        'ferreteriasVencidas', 'totalUsuarios', 'trialsProximosVencer',
+        'ferreteriasRecientes', 'trialsPendientes', 'ingresosSuscripciones', 'ferreterias'
+    ));
     }
 
     public function ferreteria(Tenant $tenant)
