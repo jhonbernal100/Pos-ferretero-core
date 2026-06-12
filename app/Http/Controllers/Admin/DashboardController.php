@@ -8,19 +8,18 @@ use App\Models\User;
 use App\Models\Venta;
 use App\Models\TrialRequest;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
 
 class DashboardController extends Controller
 {
     public function index()
     {
-        // Métricas generales
         $totalFerreterias    = Tenant::count();
         $ferreteriasTrial    = Tenant::where('subscription_status', 'trial')->count();
         $ferreteriasActivas  = Tenant::where('subscription_status', 'activa')->count();
         $ferreteriasVencidas = Tenant::where('subscription_status', 'vencida')->count();
         $totalUsuarios       = User::where('rol', '!=', 'superadmin')->count();
 
-        // Trials próximos a vencer (menos de 7 días)
         $trialsProximosVencer = Tenant::where('subscription_status', 'trial')
             ->whereNotNull('trial_ends_at')
             ->where('trial_ends_at', '>=', now())
@@ -28,25 +27,21 @@ class DashboardController extends Controller
             ->orderBy('trial_ends_at')
             ->get();
 
-        // Ferreterías recientes
         $ferreteriasRecientes = Tenant::with('usuarios')
             ->orderByDesc('created_at')
             ->limit(5)
             ->get();
 
-        // Solicitudes trial pendientes
         $trialsPendientes = TrialRequest::where('estado', 'pendiente')
             ->orderByDesc('created_at')
             ->limit(5)
             ->get();
 
-        // Ventas totales del mes en toda la plataforma
         $ventasMes = Venta::whereMonth('created_at', now()->month)
             ->whereYear('created_at', now()->year)
             ->where('estado', 'completada')
             ->sum('total');
 
-        // Ferreterías completas con detalles
         $ferreterias = Tenant::with('usuarios')
             ->orderByDesc('created_at')
             ->get()
@@ -85,54 +80,66 @@ class DashboardController extends Controller
         return view('admin.ferreteria', compact('tenant', 'ventas', 'totalVentas', 'totalProductos'));
     }
 
-    public function ampliarTrial(Tenant $tenant)
+    public function ampliarTrial(Request $request, Tenant $tenant)
     {
-        $dias = request('dias', 15);
+        $dias = (int)($request->dias ?? 15);
 
-        if ($tenant->subscription_status === 'trial') {
-            $tenant->update([
-                'trial_ends_at' => Carbon::parse($tenant->trial_ends_at)->addDays($dias),
-            ]);
+        if ($tenant->subscription_status === 'trial' && $tenant->trial_ends_at) {
+            $nuevaFecha = Carbon::parse($tenant->trial_ends_at)->addDays($dias);
         } else {
-            $tenant->update([
-                'subscription_status' => 'trial',
-                'trial_ends_at'       => now()->addDays($dias),
-            ]);
+            $nuevaFecha = now()->addDays($dias);
         }
+
+        $tenant->update([
+            'subscription_status' => 'trial',
+            'trial_ends_at'       => $nuevaFecha,
+        ]);
 
         return response()->json([
             'success' => true,
-            'mensaje' => "Trial ampliado por {$dias} dias",
+            'mensaje' => "Trial ampliado por {$dias} dias hasta " . $nuevaFecha->format('d/m/Y'),
         ]);
     }
 
-    public function cambiarPlan(Tenant $tenant)
+    public function cambiarPlan(Request $request, Tenant $tenant)
     {
-        request()->validate([
-            'plan'   => 'required|in:trial,activa,vencida,suspendida',
-            'meses'  => 'nullable|integer|min:1',
+        $request->validate([
+            'plan'  => 'required|in:trial,activa,vencida,suspendida',
+            'meses' => 'nullable|integer|min:1',
         ]);
 
-        $data = ['subscription_status' => request('plan')];
+        $data = [
+            'subscription_status' => $request->plan,
+            'subscription_plan'   => $request->plan === 'activa'
+                ? ($request->meses == 12 ? 'anual' : 'trimestral')
+                : null,
+        ];
 
-        if (request('plan') === 'activa' && request('meses')) {
-            $data['subscription_ends_at'] = now()->addMonths(request('meses'));
+        if ($request->plan === 'activa' && $request->meses) {
+            $data['subscription_ends_at'] = now()->addMonths((int)$request->meses);
+        }
+
+        if ($request->plan === 'trial') {
+            $data['trial_ends_at']        = now()->addDays(30);
+            $data['subscription_ends_at'] = null;
+        }
+
+        if (in_array($request->plan, ['vencida', 'suspendida'])) {
+            $data['subscription_ends_at'] = null;
         }
 
         $tenant->update($data);
 
         return response()->json([
             'success' => true,
-            'mensaje' => 'Plan actualizado correctamente',
+            'mensaje' => 'Plan actualizado: ' . strtoupper($request->plan) .
+                         ($request->meses ? " por {$request->meses} meses" : ''),
         ]);
     }
 
-    public function eliminarFerreteria(Tenant $tenant)
+    public function eliminarFerreteria(Request $request, Tenant $tenant)
     {
-        // Eliminar usuarios del tenant
         User::where('tenant_id', $tenant->id)->delete();
-
-        // Eliminar tenant
         $tenant->delete();
 
         return response()->json([
