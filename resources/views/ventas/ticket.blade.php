@@ -18,11 +18,6 @@
         .copia {
             width: 80mm;
             padding: 4mm 3mm;
-            page-break-after: always;
-        }
-
-        .copia:last-child {
-            page-break-after: avoid;
         }
 
         .centro { text-align: center; }
@@ -116,16 +111,6 @@
             line-height: 1.6;
         }
 
-        .tipo-copia {
-            font-size: 12px;
-            font-weight: bold;
-            text-align: center;
-            border: 1px solid #000;
-            padding: 1mm;
-            margin-bottom: 2mm;
-            letter-spacing: 2px;
-        }
-
         .no-print {
             display: block;
             text-align: center;
@@ -141,13 +126,7 @@
 </head>
 <body>
 
-@for($copia = 1; $copia <= 2; $copia++)
 <div class="copia">
-
-    {{-- Tipo de copia --}}
-    <div class="tipo-copia">
-        {{ $copia === 1 ? '*** COPIA CLIENTE ***' : '*** COPIA FERRETERÍA ***' }}
-    </div>
 
     {{-- Encabezado --}}
     <div class="nombre-ferreteria">{{ $venta->tenant->nombre }}</div>
@@ -265,13 +244,12 @@
     </div>
 
 </div>
-@endfor
 
 {{-- Botón imprimir --}}
 <div class="no-print">
     <button onclick="window.print()"
         style="padding:10px 20px;font-size:16px;cursor:pointer;background:#000;color:#fff;border:none;border-radius:6px;margin:10px;">
-        🖨 Imprimir ticket
+        Imprimir ticket
     </button>
 </div>
 
