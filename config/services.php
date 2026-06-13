@@ -35,4 +35,10 @@ return [
         ],
     ],
 
+    'infobip' => [
+    'api_key'  => env('d556063264d16d59a59f92f5bd019eae-31dc0899-be9c-4af7-92f3-be0849856a14'),
+    'base_url' => env('gr5xvw.api.infobip.com'),
+    'from'     => env('INFOBIP_FROM', 'POS-Ferretero'),
+],
+
 ];

@@ -20,9 +20,11 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
+            position: relative;
         }
 
         .navbar-brand { font-size: 18px; font-weight: bold; color: #fff; text-decoration: none; }
+        .navbar-right  { display: flex; align-items: center; gap: 16px; }
         .navbar-user { font-size: 12px; color: #aaa; text-align: right; }
         .navbar-user span { display: block; color: #fff; font-size: 14px; }
 
@@ -75,6 +77,111 @@
         }
 
         .alerta-trial a { color: #856404; font-weight: bold; }
+
+        /* Campanita */
+        .campana-wrapper {
+            position: relative;
+            cursor: pointer;
+            padding: 4px;
+        }
+
+        .campana-icono { font-size: 20px; }
+
+        .campana-badge {
+            display: none;
+            position: absolute;
+            top: 0px;
+            right: 0px;
+            background: #c00;
+            color: #fff;
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            font-size: 9px;
+            font-weight: bold;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .panel-mensajes {
+            display: none;
+            position: absolute;
+            top: 56px;
+            right: 20px;
+            width: 320px;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+            z-index: 9999;
+            border: 1px solid #eee;
+            overflow: hidden;
+        }
+
+        .panel-mensajes-header {
+            background: #000;
+            color: #fff;
+            padding: 12px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .panel-mensajes-header button {
+            background: none;
+            border: none;
+            color: #aaa;
+            cursor: pointer;
+            font-size: 16px;
+            line-height: 1;
+        }
+
+        .panel-mensajes-lista {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .mensaje-item {
+            padding: 12px 16px;
+            border-bottom: 1px solid #f5f5f5;
+        }
+
+        .mensaje-item-asunto {
+            font-size: 12px;
+            font-weight: bold;
+            color: #000;
+            margin-bottom: 4px;
+        }
+
+        .mensaje-item-contenido {
+            font-size: 12px;
+            color: #555;
+            line-height: 1.4;
+        }
+
+        .mensaje-item-fecha {
+            font-size: 10px;
+            color: #aaa;
+            margin-top: 4px;
+        }
+
+        .panel-mensajes-footer {
+            padding: 10px 16px;
+            border-top: 1px solid #eee;
+        }
+
+        .panel-mensajes-footer button {
+            width: 100%;
+            padding: 8px;
+            background: #f0f0f0;
+            border: none;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .panel-mensajes-footer button:hover { background: #e0e0e0; }
     </style>
     @yield('estilos')
     <script>
@@ -90,9 +197,40 @@
            class="navbar-brand">
             POS Ferretero
         </a>
-        <div class="navbar-user">
-            {{ auth()->user()->name ?? 'Usuario' }}
-            <span>{{ auth()->user()->tenant->nombre ?? 'Avanzas Digital' }}</span>
+
+        <div class="navbar-right">
+
+            {{-- Campanita solo para dueno y auxiliar --}}
+            @if(auth()->user()->rol !== 'superadmin')
+            <div class="campana-wrapper" onclick="toggleMensajes()">
+                <div class="campana-icono">🔔</div>
+                <span class="campana-badge" id="campana-badge">0</span>
+            </div>
+
+            {{-- Panel de mensajes --}}
+            <div class="panel-mensajes" id="panel-mensajes">
+                <div class="panel-mensajes-header">
+                    <span>Mensajes de Avanzas Digital</span>
+                    <button onclick="cerrarMensajes()">&#x2715;</button>
+                </div>
+                <div class="panel-mensajes-lista" id="lista-mensajes">
+                    <div style="padding:20px;text-align:center;color:#aaa;font-size:13px;">
+                        Cargando...
+                    </div>
+                </div>
+                <div class="panel-mensajes-footer">
+                    <button onclick="marcarTodosLeidos()">
+                        Marcar todos como leidos
+                    </button>
+                </div>
+            </div>
+            @endif
+
+            <div class="navbar-user">
+                {{ auth()->user()->name ?? 'Usuario' }}
+                <span>{{ auth()->user()->tenant->nombre ?? 'Avanzas Digital' }}</span>
+            </div>
+
         </div>
     </nav>
 
@@ -200,5 +338,82 @@
     </footer>
 
     @yield('scripts')
+
+    {{-- Sistema de mensajes campanita --}}
+    @if(auth()->user()->rol !== 'superadmin')
+    <script>
+    let mensajesAbierto = false;
+
+    async function cargarMensajes() {
+        try {
+            const res  = await fetch('/mensajes/no-leidos');
+            const data = await res.json();
+
+            const badge = document.getElementById('campana-badge');
+            if (!badge) return;
+
+            if (data.count > 0) {
+                badge.style.display = 'flex';
+                badge.textContent   = data.count > 9 ? '9+' : data.count;
+            } else {
+                badge.style.display = 'none';
+            }
+
+            const lista = document.getElementById('lista-mensajes');
+            if (!lista) return;
+
+            if (data.mensajes.length === 0) {
+                lista.innerHTML = '<div style="padding:20px;text-align:center;color:#aaa;font-size:13px;">Sin mensajes nuevos</div>';
+            } else {
+                lista.innerHTML = data.mensajes.map(m => `
+                    <div class="mensaje-item">
+                        <div class="mensaje-item-asunto">${m.asunto}</div>
+                        <div class="mensaje-item-contenido">${m.contenido}</div>
+                        <div class="mensaje-item-fecha">${m.created_at}</div>
+                    </div>
+                `).join('');
+            }
+        } catch (e) {}
+    }
+
+    function toggleMensajes() {
+        mensajesAbierto = !mensajesAbierto;
+        const panel = document.getElementById('panel-mensajes');
+        panel.style.display = mensajesAbierto ? 'block' : 'none';
+        if (mensajesAbierto) cargarMensajes();
+    }
+
+    function cerrarMensajes() {
+        mensajesAbierto = false;
+        document.getElementById('panel-mensajes').style.display = 'none';
+    }
+
+    async function marcarTodosLeidos() {
+        await fetch('/mensajes/leer', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+            },
+        });
+        await cargarMensajes();
+        cerrarMensajes();
+    }
+
+    // Cerrar al hacer click fuera
+    document.addEventListener('click', function(e) {
+        const wrapper = document.querySelector('.campana-wrapper');
+        const panel   = document.getElementById('panel-mensajes');
+        if (wrapper && panel && !wrapper.contains(e.target) && !panel.contains(e.target)) {
+            cerrarMensajes();
+        }
+    });
+
+    // Polling cada 30 segundos
+    cargarMensajes();
+    setInterval(cargarMensajes, 30000);
+    </script>
+    @endif
+
 </body>
 </html>

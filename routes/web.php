@@ -14,6 +14,7 @@ use App\Http\Controllers\GastoController;
 use App\Http\Controllers\UsuarioController;
 use App\Http\Controllers\PlanesController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\MensajeController;
 
 Route::get('/', fn() => redirect('/login'));
 
@@ -36,6 +37,8 @@ Route::prefix('trial')->group(function () {
 Route::get('/planes', [PlanesController::class, 'index'])->name('planes.index');
 
 Route::middleware('auth')->group(function () {
+    Route::get('/mensajes/no-leidos',  [MensajeController::class, 'noLeidos'])->name('mensajes.noLeidos');
+    Route::post('/mensajes/leer',      [MensajeController::class, 'marcarLeido'])->name('mensajes.leer');
 
     Route::prefix('ventas')->group(function () {
         Route::get('/',                     [VentaController::class, 'index'])->name('ventas.index');
@@ -121,6 +124,8 @@ Route::middleware('auth')->group(function () {
         Route::post('/ferreterias/{tenant}/ampliar-trial', [DashboardController::class, 'ampliarTrial'])->name('admin.ampliarTrial');
         Route::post('/ferreterias/{tenant}/cambiar-plan', [DashboardController::class, 'cambiarPlan'])->name('admin.cambiarPlan');
         Route::delete('/ferreterias/{tenant}/eliminar', [DashboardController::class, 'eliminarFerreteria'])->name('admin.eliminarFerreteria');
+        Route::post('/mensajes/enviar',        [MensajeController::class, 'enviar'])->name('admin.mensajes.enviar');
+        Route::post('/mensajes/masivo',        [MensajeController::class, 'enviarMasivo'])->name('admin.mensajes.masivo');
     });
 
 

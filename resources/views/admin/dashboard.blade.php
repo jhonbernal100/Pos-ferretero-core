@@ -39,6 +39,9 @@
             font-size: 22px;
             font-weight: bold;
             margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
 
         .metricas {
@@ -93,6 +96,8 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
         }
 
         .seccion-header h2 { font-size: 16px; font-weight: bold; }
@@ -134,10 +139,10 @@
             font-weight: bold;
         }
 
-        .badge-trial     { background: #fff3cd; color: #856404; }
-        .badge-activa    { background: #d4edda; color: #155724; }
-        .badge-vencida   { background: #f8d7da; color: #721c24; }
-        .badge-suspendida{ background: #f0f0f0; color: #555; }
+        .badge-trial      { background: #fff3cd; color: #856404; }
+        .badge-activa     { background: #d4edda; color: #155724; }
+        .badge-vencida    { background: #f8d7da; color: #721c24; }
+        .badge-suspendida { background: #f0f0f0; color: #555; }
 
         .btn-sm {
             padding: 5px 10px;
@@ -153,6 +158,7 @@
         .btn-ampliar  { background: #856404; color: #fff; }
         .btn-plan     { background: #4285F4; color: #fff; }
         .btn-eliminar { background: #c00; color: #fff; }
+        .btn-mensaje  { background: #99CF8E; color: #000; }
 
         .modal-overlay {
             display: none;
@@ -180,13 +186,15 @@
         .modal-campo { margin-bottom: 14px; }
         .modal-campo label { display: block; font-size: 13px; color: #555; margin-bottom: 4px; }
         .modal-campo select,
-        .modal-campo input {
+        .modal-campo input,
+        .modal-campo textarea {
             width: 100%;
             padding: 10px;
             font-size: 14px;
             border: 2px solid #ddd;
             border-radius: 8px;
         }
+        .modal-campo textarea { height: 100px; resize: none; }
 
         .modal-btns { display: flex; gap: 8px; margin-top: 16px; }
         .modal-btn-ok {
@@ -211,6 +219,8 @@
         .sku-alto  { color: #155724; font-weight: bold; }
         .sku-medio { color: #856404; font-weight: bold; }
         .sku-bajo  { color: #000; }
+
+        .char-info { font-size: 11px; color: #aaa; margin-top: 3px; }
     </style>
 </head>
 <body>
@@ -230,7 +240,14 @@
 
 <div class="container">
 
-    <div class="page-title">Dashboard de Ferreterias</div>
+    <div class="page-title">
+        Dashboard de Ferreterias
+        <button onclick="document.getElementById('modal-masivo').classList.add('activo')"
+            style="margin-left:auto;padding:8px 20px;background:#99CF8E;color:#000;
+                   border:none;border-radius:8px;font-size:13px;font-weight:bold;cursor:pointer;">
+            Mensaje masivo
+        </button>
+    </div>
 
     {{-- METRICAS --}}
     <div class="metricas">
@@ -353,15 +370,19 @@
                     <td>
                         <div style="display:flex;gap:4px;flex-wrap:wrap;">
                             <button class="btn-sm btn-ampliar"
-                                onclick="abrirModalAmpliar({{ $tenant->id }}, '{{ $tenant->nombre }}')">
+                                onclick="abrirModalAmpliar({{ $tenant->id }}, '{{ addslashes($tenant->nombre) }}')">
                                 + Dias
                             </button>
                             <button class="btn-sm btn-plan"
-                                onclick="abrirModalPlan({{ $tenant->id }}, '{{ $tenant->nombre }}')">
+                                onclick="abrirModalPlan({{ $tenant->id }}, '{{ addslashes($tenant->nombre) }}')">
                                 Plan
                             </button>
+                            <button class="btn-sm btn-mensaje"
+                                onclick="abrirModalMensaje({{ $tenant->id }}, '{{ addslashes($tenant->nombre) }}')">
+                                Mensaje
+                            </button>
                             <button class="btn-sm btn-eliminar"
-                                onclick="eliminar({{ $tenant->id }}, '{{ $tenant->nombre }}')">
+                                onclick="eliminar({{ $tenant->id }}, '{{ addslashes($tenant->nombre) }}')">
                                 Eliminar
                             </button>
                         </div>
@@ -425,10 +446,82 @@
     </div>
 </div>
 
+{{-- MODAL ENVIAR MENSAJE INDIVIDUAL --}}
+<div class="modal-overlay" id="modal-mensaje">
+    <div class="modal" style="width:500px;">
+        <h3>Enviar mensaje</h3>
+        <p id="modal-mensaje-nombre" style="font-size:13px;color:#888;margin-bottom:16px;"></p>
+        <div class="modal-campo">
+            <label>Tipo de envio</label>
+            <select id="input-tipo-mensaje">
+                <option value="plataforma">Solo plataforma (campanita)</option>
+                <option value="sms">Solo SMS</option>
+                <option value="ambos">Plataforma + SMS</option>
+            </select>
+        </div>
+        <div class="modal-campo">
+            <label>Asunto *</label>
+            <input type="text" id="input-asunto" placeholder="Ej: Actualizacion importante" maxlength="191">
+        </div>
+        <div class="modal-campo">
+            <label>Mensaje * (max 500 caracteres)</label>
+            <textarea id="input-contenido" maxlength="500"
+                placeholder="Escribe el mensaje aqui..."></textarea>
+            <div class="char-info"><span id="char-count">0</span>/500 caracteres</div>
+        </div>
+        <div class="modal-btns">
+            <button class="modal-btn-cancel" onclick="cerrarModales()">Cancelar</button>
+            <button class="modal-btn-ok" onclick="confirmarMensaje()">Enviar</button>
+        </div>
+    </div>
+</div>
+
+{{-- MODAL MENSAJE MASIVO --}}
+<div class="modal-overlay" id="modal-masivo">
+    <div class="modal" style="width:500px;">
+        <h3>Mensaje masivo</h3>
+        <p style="font-size:13px;color:#888;margin-bottom:16px;">
+            Envia un mensaje a multiples ferreterias a la vez.
+        </p>
+        <div class="modal-campo">
+            <label>Enviar a</label>
+            <select id="input-filtro-masivo">
+                <option value="todas">Todas las ferreterias</option>
+                <option value="trial">Solo en trial</option>
+                <option value="activa">Solo activas (pago)</option>
+                <option value="vencida">Solo vencidas</option>
+            </select>
+        </div>
+        <div class="modal-campo">
+            <label>Tipo de envio</label>
+            <select id="input-tipo-masivo">
+                <option value="plataforma">Solo plataforma (campanita)</option>
+                <option value="sms">Solo SMS</option>
+                <option value="ambos">Plataforma + SMS</option>
+            </select>
+        </div>
+        <div class="modal-campo">
+            <label>Asunto *</label>
+            <input type="text" id="input-asunto-masivo"
+                   placeholder="Ej: Mantenimiento programado" maxlength="191">
+        </div>
+        <div class="modal-campo">
+            <label>Mensaje * (max 500 caracteres)</label>
+            <textarea id="input-contenido-masivo" maxlength="500"
+                placeholder="Escribe el mensaje aqui..."></textarea>
+        </div>
+        <div class="modal-btns">
+            <button class="modal-btn-cancel" onclick="cerrarModales()">Cancelar</button>
+            <button class="modal-btn-ok" onclick="confirmarMasivo()">Enviar a todas</button>
+        </div>
+    </div>
+</div>
+
 <div class="mensaje-flash" id="flash"></div>
 
 <script>
-let tenantActual = null;
+let tenantActual  = null;
+let tenantMensaje = null;
 
 function filtrar(q) {
     document.querySelectorAll('.fila-ferreteria').forEach(fila => {
@@ -448,15 +541,34 @@ function abrirModalPlan(id, nombre) {
     document.getElementById('modal-plan').classList.add('activo');
 }
 
+function abrirModalMensaje(id, nombre) {
+    tenantMensaje = id;
+    document.getElementById('modal-mensaje-nombre').textContent = nombre;
+    document.getElementById('input-asunto').value    = '';
+    document.getElementById('input-contenido').value = '';
+    document.getElementById('char-count').textContent = '0';
+    document.getElementById('modal-mensaje').classList.add('activo');
+}
+
 function cerrarModales() {
     document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('activo'));
-    tenantActual = null;
+    tenantActual  = null;
+    tenantMensaje = null;
 }
+
+// Contador de caracteres
+document.addEventListener('DOMContentLoaded', () => {
+    const contenido = document.getElementById('input-contenido');
+    if (contenido) {
+        contenido.addEventListener('input', () => {
+            document.getElementById('char-count').textContent = contenido.value.length;
+        });
+    }
+});
 
 async function confirmarAmpliar() {
     const dias = document.getElementById('input-dias').value;
-
-    const res = await fetch(`/admin/ferreterias/${tenantActual}/ampliar-trial`, {
+    const res  = await fetch(`/admin/ferreterias/${tenantActual}/ampliar-trial`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -464,7 +576,6 @@ async function confirmarAmpliar() {
         },
         body: JSON.stringify({ dias }),
     });
-
     const data = await res.json();
     cerrarModales();
     mostrarFlash(data.mensaje);
@@ -474,8 +585,7 @@ async function confirmarAmpliar() {
 async function confirmarPlan() {
     const plan  = document.getElementById('input-plan').value;
     const meses = document.getElementById('input-meses').value;
-
-    const res = await fetch(`/admin/ferreterias/${tenantActual}/cambiar-plan`, {
+    const res   = await fetch(`/admin/ferreterias/${tenantActual}/cambiar-plan`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -483,16 +593,57 @@ async function confirmarPlan() {
         },
         body: JSON.stringify({ plan, meses }),
     });
-
     const data = await res.json();
     cerrarModales();
     mostrarFlash(data.mensaje);
     setTimeout(() => location.reload(), 1500);
 }
 
+async function confirmarMensaje() {
+    const asunto   = document.getElementById('input-asunto').value;
+    const contenido= document.getElementById('input-contenido').value;
+    const tipo     = document.getElementById('input-tipo-mensaje').value;
+
+    if (!asunto || !contenido) { alert('Completa todos los campos'); return; }
+
+    const res = await fetch('/admin/mensajes/enviar', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+        },
+        body: JSON.stringify({ tenant_id: tenantMensaje, asunto, contenido, tipo }),
+    });
+
+    const data = await res.json();
+    cerrarModales();
+    mostrarFlash(data.success ? data.mensaje : 'Error: ' + data.mensaje);
+}
+
+async function confirmarMasivo() {
+    const asunto   = document.getElementById('input-asunto-masivo').value;
+    const contenido= document.getElementById('input-contenido-masivo').value;
+    const tipo     = document.getElementById('input-tipo-masivo').value;
+    const filtro   = document.getElementById('input-filtro-masivo').value;
+
+    if (!asunto || !contenido) { alert('Completa todos los campos'); return; }
+
+    const res = await fetch('/admin/mensajes/masivo', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+        },
+        body: JSON.stringify({ asunto, contenido, tipo, filtro }),
+    });
+
+    const data = await res.json();
+    cerrarModales();
+    mostrarFlash(data.mensaje);
+}
+
 async function eliminar(id, nombre) {
     if (!confirm(`Eliminar "${nombre}" y todos sus datos?\n\nEsta accion no se puede deshacer.`)) return;
-
     const res = await fetch(`/admin/ferreterias/${id}/eliminar`, {
         method: 'DELETE',
         headers: {
@@ -500,7 +651,6 @@ async function eliminar(id, nombre) {
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
         },
     });
-
     const data = await res.json();
     mostrarFlash(data.mensaje);
     setTimeout(() => location.reload(), 1500);
