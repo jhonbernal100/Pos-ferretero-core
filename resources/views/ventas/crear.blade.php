@@ -38,7 +38,7 @@
     .select-cliente { width: 100%; padding: 10px; font-size: 14px; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 10px; }
     .empty-carrito { text-align: center; color: #aaa; margin-top: 40px; font-size: 15px; }
 
-    /* Skeleton loader para imágenes */
+    /* Imagen con skeleton */
     .img-wrapper {
         width: 100%;
         height: 80px;
@@ -55,11 +55,11 @@
         object-fit: cover;
         opacity: 0;
         transition: opacity 0.3s ease;
+        position: absolute;
+        top: 0; left: 0;
     }
 
-    .img-wrapper img.loaded {
-        opacity: 1;
-    }
+    .img-wrapper img.loaded { opacity: 1; }
 
     .img-placeholder {
         position: absolute;
@@ -68,12 +68,13 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 32px;
+        font-size: 28px;
         background: #f5f5f5;
         transition: opacity 0.3s ease;
+        z-index: 1;
     }
 
-    .img-placeholder.oculto { opacity: 0; }
+    .img-placeholder.oculto { opacity: 0; pointer-events: none; }
 
     @media (max-width: 768px) {
         .layout { grid-template-columns: 1fr; grid-template-rows: 1fr auto; height: auto; }
@@ -87,7 +88,7 @@
 
 @section('contenido')
 <div class="layout">
-    <div class="panel-productos">
+    <div class="panel-productos" id="panel-scroll">
         <input type="text" class="buscador" id="buscador"
                placeholder="Buscar producto..." autofocus>
         <div class="grid-productos" id="grid-productos">
@@ -102,11 +103,11 @@
             <div class="img-wrapper">
                 @if($producto->foto)
                     <div class="img-placeholder" id="ph-{{ $producto->id }}">🔩</div>
-                    <img src="{{ asset('storage/' . $producto->foto) }}"
-                         loading="lazy"
-                         decoding="async"
+                    <img data-src="{{ asset('storage/' . $producto->foto) }}"
+                         src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=="
                          alt="{{ $producto->nombre }}"
-                         onload="this.classList.add('loaded'); document.getElementById('ph-{{ $producto->id }}').classList.add('oculto')"
+                         class="lazy-img"
+                         data-id="{{ $producto->id }}"
                          onerror="this.style.display='none'">
                 @else
                     <div class="img-placeholder">🔩</div>
@@ -312,6 +313,28 @@ document.getElementById('buscador').addEventListener('input', function() {
         card.style.display = card.dataset.nombre.toLowerCase().includes(q) ? 'block' : 'none';
     });
 });
+
+// Intersection Observer — carga imagenes 300px antes de que sean visibles
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            const img = entry.target;
+            img.src   = img.dataset.src;
+            img.onload = () => {
+                img.classList.add('loaded');
+                const ph = document.getElementById('ph-' + img.dataset.id);
+                if (ph) ph.classList.add('oculto');
+            };
+            observer.unobserve(img);
+        }
+    });
+}, {
+    root: document.getElementById('panel-scroll'),
+    rootMargin: '300px 0px',
+    threshold: 0
+});
+
+document.querySelectorAll('.lazy-img').forEach(img => observer.observe(img));
 
 if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/sw.js');
