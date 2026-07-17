@@ -37,6 +37,44 @@
     .btn-limpiar { width: 100%; padding: 10px; background: none; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; cursor: pointer; margin-top: 8px; color: #c00; }
     .select-cliente { width: 100%; padding: 10px; font-size: 14px; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 10px; }
     .empty-carrito { text-align: center; color: #aaa; margin-top: 40px; font-size: 15px; }
+
+    /* Skeleton loader para imágenes */
+    .img-wrapper {
+        width: 100%;
+        height: 80px;
+        margin-bottom: 8px;
+        border-radius: 6px;
+        overflow: hidden;
+        background: #f0f0f0;
+        position: relative;
+    }
+
+    .img-wrapper img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .img-wrapper img.loaded {
+        opacity: 1;
+    }
+
+    .img-placeholder {
+        position: absolute;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 32px;
+        background: #f5f5f5;
+        transition: opacity 0.3s ease;
+    }
+
+    .img-placeholder.oculto { opacity: 0; }
+
     @media (max-width: 768px) {
         .layout { grid-template-columns: 1fr; grid-template-rows: 1fr auto; height: auto; }
         .panel-carrito { border-left: none; border-top: 2px solid #ddd; max-height: 45vh; }
@@ -55,28 +93,33 @@
         <div class="grid-productos" id="grid-productos">
         @foreach($productos as $producto)
         <div class="producto-card {{ $producto->stock <= 0 ? 'sin-stock' : '' }}"
-        data-id="{{ $producto->id }}"
-        data-nombre="{{ $producto->nombre }}"
-        data-precio="{{ $producto->precio_venta }}"
-        data-stock="{{ $producto->stock }}"
-        onclick="agregarAlCarrito(this)">
-        @if($producto->foto)
-            <div style="width:100%;height:80px;margin-bottom:8px;border-radius:6px;overflow:hidden;background:#f5f5f5;">
-            <img src="{{ asset('storage/' . $producto->foto) }}"
-             style="width:100%;height:100%;object-fit:cover;">
+            data-id="{{ $producto->id }}"
+            data-nombre="{{ $producto->nombre }}"
+            data-precio="{{ $producto->precio_venta }}"
+            data-stock="{{ $producto->stock }}"
+            onclick="agregarAlCarrito(this)">
+
+            <div class="img-wrapper">
+                @if($producto->foto)
+                    <div class="img-placeholder" id="ph-{{ $producto->id }}">🔩</div>
+                    <img src="{{ asset('storage/' . $producto->foto) }}"
+                         loading="lazy"
+                         decoding="async"
+                         alt="{{ $producto->nombre }}"
+                         onload="this.classList.add('loaded'); document.getElementById('ph-{{ $producto->id }}').classList.add('oculto')"
+                         onerror="this.style.display='none'">
+                @else
+                    <div class="img-placeholder">🔩</div>
+                @endif
             </div>
-    @else
-    <div style="width:100%;height:80px;margin-bottom:8px;border-radius:6px;background:#f5f5f5;display:flex;align-items:center;justify-content:center;font-size:32px;">
-        🔩
-    </div>
-    @endif
-    <div class="nombre">{{ $producto->nombre }}</div>
-    <div class="precio">$ {{ number_format($producto->precio_venta, 0, ',', '.') }}</div>
-    <div class="stock {{ $producto->stock > $producto->stock_minimo ? 'stock-ok' : ($producto->stock > 0 ? 'stock-bajo' : 'stock-cero') }}">
-        {{ $producto->stock > 0 ? 'Stock: ' . $producto->stock : 'Sin stock' }}
-    </div>
-</div>
-@endforeach
+
+            <div class="nombre">{{ $producto->nombre }}</div>
+            <div class="precio">$ {{ number_format($producto->precio_venta, 0, ',', '.') }}</div>
+            <div class="stock {{ $producto->stock > $producto->stock_minimo ? 'stock-ok' : ($producto->stock > 0 ? 'stock-bajo' : 'stock-cero') }}">
+                {{ $producto->stock > 0 ? 'Stock: ' . $producto->stock : 'Sin stock' }}
+            </div>
+        </div>
+        @endforeach
         </div>
     </div>
 
@@ -103,7 +146,7 @@
             <select class="select-pago" id="select-pago" onchange="actualizarCambio()">
                 <option value="efectivo">Efectivo</option>
                 <option value="transferencia">Transferencia</option>
-                <option value="credito">Crédito</option>
+                <option value="credito">Credito</option>
             </select>
             <input type="number" class="input-pago" id="input-pago"
                    placeholder="Monto recibido" oninput="actualizarCambio()">
@@ -132,9 +175,9 @@ function formatCOP(n) {
 
 function agregarAlCarrito(card) {
     if (card.classList.contains('sin-stock')) return;
-    const id      = card.dataset.id;
-    const nombre  = card.dataset.nombre;
-    const precio  = parseInt(card.dataset.precio);
+    const id        = card.dataset.id;
+    const nombre    = card.dataset.nombre;
+    const precio    = parseInt(card.dataset.precio);
     const existente = carrito.find(i => i.id === id);
     if (existente) {
         existente.cantidad++;
@@ -241,7 +284,7 @@ async function procesarVenta() {
         });
 
         if (res.status === 419) {
-            alert('La sesión expiró. La página se recargará.');
+            alert('La sesion expiro. La pagina se recargara.');
             window.location.reload();
             return;
         }
@@ -257,7 +300,7 @@ async function procesarVenta() {
             btn.textContent = 'COBRAR';
         }
     } catch (e) {
-        alert('Error de conexión: ' + e.message);
+        alert('Error de conexion: ' + e.message);
         btn.disabled    = false;
         btn.textContent = 'COBRAR';
     }

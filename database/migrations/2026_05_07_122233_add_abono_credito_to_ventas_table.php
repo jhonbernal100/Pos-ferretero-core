@@ -17,6 +17,7 @@ return new class extends Migration
                 'ticket',
                 'factura_electronica',
                 'abono_credito',
+                'boleta',
             ])->default('ticket')->after('cliente_id');
         });
     }
