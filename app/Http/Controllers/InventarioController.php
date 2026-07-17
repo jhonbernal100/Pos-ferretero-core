@@ -68,7 +68,7 @@ class InventarioController extends Controller
             if (empty($textoOCR)) {
                 return response()->json([
                     'success' => false,
-                    'mensaje' => 'No se detectó texto en la imagen. Intenta con mejor iluminación.',
+                    'mensaje' => 'No se detecto texto en la imagen. Intenta con mejor iluminacion.',
                 ], 422);
             }
 
@@ -129,76 +129,123 @@ Devuélveme ÚNICAMENTE un JSON válido con esta estructura, sin texto adicional
         }
     }
 
+    // Optimizar y guardar imagen
+    private function optimizarYGuardarImagen(string $imagenBase64, string $nombre): string
+    {
+        $imagen = base64_decode($imagenBase64);
+        $img    = @imagecreatefromstring($imagen);
+
+        if ($img !== false) {
+            $anchoOriginal = imagesx($img);
+            $altoOriginal  = imagesy($img);
+            $maxSize       = 400;
+
+            if ($anchoOriginal > $maxSize || $altoOriginal > $maxSize) {
+                $ratio      = min($maxSize / $anchoOriginal, $maxSize / $altoOriginal);
+                $nuevoAncho = (int)($anchoOriginal * $ratio);
+                $nuevoAlto  = (int)($altoOriginal  * $ratio);
+
+                $imgRedim = imagecreatetruecolor($nuevoAncho, $nuevoAlto);
+
+                // Fondo blanco para transparencias
+                $blanco = imagecolorallocate($imgRedim, 255, 255, 255);
+                imagefill($imgRedim, 0, 0, $blanco);
+
+                imagecopyresampled(
+                    $imgRedim, $img,
+                    0, 0, 0, 0,
+                    $nuevoAncho, $nuevoAlto,
+                    $anchoOriginal, $altoOriginal
+                );
+
+                ob_start();
+                imagejpeg($imgRedim, null, 75);
+                $imagenOptimizada = ob_get_clean();
+
+                imagedestroy($img);
+                imagedestroy($imgRedim);
+            } else {
+                ob_start();
+                imagejpeg($img, null, 75);
+                $imagenOptimizada = ob_get_clean();
+                imagedestroy($img);
+            }
+
+            \Storage::disk('public')->put($nombre, $imagenOptimizada);
+        } else {
+            // Fallback si GD no puede procesar
+            \Storage::disk('public')->put($nombre, $imagen);
+        }
+
+        return $nombre;
+    }
+
     public function guardar(Request $request)
-{
-    $request->validate([
-        'nombre'        => 'required|string|max:191',
-        'precio_compra' => 'required|integer|min:0',
-        'precio_venta'  => 'required|integer|min:0',
-        'stock'         => 'required|integer|min:0',
-    ]);
+    {
+        $request->validate([
+            'nombre'        => 'required|string|max:191',
+            'precio_compra' => 'required|integer|min:0',
+            'precio_venta'  => 'required|integer|min:0',
+            'stock'         => 'required|integer|min:0',
+        ]);
 
-    // Guardar foto en storage
-    $foto = null;
-    if ($request->foto_base64) {
-        $imagen = base64_decode($request->foto_base64);
-        $nombre = 'productos/' . uniqid() . '.jpg';
-        \Storage::disk('public')->put($nombre, $imagen);
-        $foto = $nombre;
-    }
+        // Guardar foto optimizada
+        $foto = null;
+        if ($request->foto_base64) {
+            $nombre = 'productos/' . uniqid() . '.jpg';
+            $foto   = $this->optimizarYGuardarImagen($request->foto_base64, $nombre);
+        }
 
-    // Solo buscar duplicado si tiene referencia definida
-    $productoExistente = null;
-    if ($request->referencia) {
-        $productoExistente = Producto::where('tenant_id', session('tenant_id'))
-            ->where('referencia', $request->referencia)
-            ->first();
-    }
+        // Solo buscar duplicado si tiene referencia definida
+        $productoExistente = null;
+        if ($request->referencia) {
+            $productoExistente = Producto::where('tenant_id', session('tenant_id'))
+                ->where('referencia', $request->referencia)
+                ->first();
+        }
 
-    if ($productoExistente) {
-        // Actualizar producto existente
-        $productoExistente->update([
+        if ($productoExistente) {
+            $productoExistente->update([
+                'nombre'        => $request->nombre,
+                'marca'         => $request->marca,
+                'categoria'     => $request->categoria,
+                'unidad'        => $request->unidad ?? 'unidad',
+                'precio_compra' => $request->precio_compra,
+                'precio_venta'  => $request->precio_venta,
+                'stock'         => $request->stock,
+                'stock_minimo'  => $request->stock_minimo ?? 5,
+                'foto'          => $foto ?? $productoExistente->foto,
+                'activo'        => true,
+            ]);
+
+            return response()->json([
+                'success'  => true,
+                'producto' => $productoExistente,
+                'mensaje'  => 'Producto ya existia — inventario actualizado',
+            ]);
+        }
+
+        $producto = Producto::create([
+            'tenant_id'     => session('tenant_id'),
             'nombre'        => $request->nombre,
             'marca'         => $request->marca,
             'categoria'     => $request->categoria,
             'unidad'        => $request->unidad ?? 'unidad',
+            'referencia'    => $request->referencia,
             'precio_compra' => $request->precio_compra,
             'precio_venta'  => $request->precio_venta,
             'stock'         => $request->stock,
             'stock_minimo'  => $request->stock_minimo ?? 5,
-            'foto'          => $foto ?? $productoExistente->foto,
+            'foto'          => $foto,
             'activo'        => true,
         ]);
 
         return response()->json([
             'success'  => true,
-            'producto' => $productoExistente,
-            'mensaje'  => 'Producto ya existía — inventario actualizado',
+            'producto' => $producto,
+            'mensaje'  => 'Producto agregado al inventario',
         ]);
     }
-
-    // Crear nuevo producto
-    $producto = Producto::create([
-        'tenant_id'     => session('tenant_id'),
-        'nombre'        => $request->nombre,
-        'marca'         => $request->marca,
-        'categoria'     => $request->categoria,
-        'unidad'        => $request->unidad ?? 'unidad',
-        'referencia'    => $request->referencia,
-        'precio_compra' => $request->precio_compra,
-        'precio_venta'  => $request->precio_venta,
-        'stock'         => $request->stock,
-        'stock_minimo'  => $request->stock_minimo ?? 5,
-        'foto'          => $foto,
-        'activo'        => true,
-    ]);
-
-    return response()->json([
-        'success'  => true,
-        'producto' => $producto,
-        'mensaje'  => 'Producto agregado al inventario',
-    ]);
-}
 
     public function actualizar(Request $request, Producto $producto)
     {
@@ -219,67 +266,68 @@ Devuélveme ÚNICAMENTE un JSON válido con esta estructura, sin texto adicional
         $proveedores = Proveedor::where('activo', true)
             ->orderBy('nombre')
             ->get();
-    
+
         return view('inventario.crear-manual', compact('proveedores'));
     }
-    
+
     public function editar(Producto $producto)
     {
         $proveedores = Proveedor::where('activo', true)
             ->orderBy('nombre')
             ->get();
-    
+
         return view('inventario.editar', compact('producto', 'proveedores'));
     }
-      
-    public function actualizar_producto(Request $request, Producto $producto)
-{
-    $request->validate([
-        'nombre'        => 'required|string|max:191',
-        'precio_compra' => 'required|integer|min:0',
-        'precio_venta'  => 'required|integer|min:0',
-        'stock'         => 'required|integer|min:0',
-    ]);
 
-    // Guardar foto si viene nueva
-    $foto = $producto->foto;
-    if ($request->hasFile('foto')) {
-        $foto = $request->file('foto')->store('productos', 'public');
-    } elseif ($request->foto_base64) {
-        $imagen = base64_decode($request->foto_base64);
-        $nombre = 'productos/' . uniqid() . '.jpg';
-        \Storage::disk('public')->put($nombre, $imagen);
-        $foto = $nombre;
+    public function actualizar_producto(Request $request, Producto $producto)
+    {
+        $request->validate([
+            'nombre'        => 'required|string|max:191',
+            'precio_compra' => 'required|integer|min:0',
+            'precio_venta'  => 'required|integer|min:0',
+            'stock'         => 'required|integer|min:0',
+        ]);
+
+        // Guardar foto optimizada si viene nueva
+        $foto = $producto->foto;
+
+        if ($request->hasFile('foto')) {
+            $nombre = 'productos/' . uniqid() . '.jpg';
+            $imagen = file_get_contents($request->file('foto')->getRealPath());
+            $foto   = $this->optimizarYGuardarImagen(base64_encode($imagen), $nombre);
+        } elseif ($request->foto_base64) {
+            $nombre = 'productos/' . uniqid() . '.jpg';
+            $foto   = $this->optimizarYGuardarImagen($request->foto_base64, $nombre);
+        }
+
+        $producto->update([
+            'nombre'        => $request->nombre,
+            'marca'         => $request->marca,
+            'categoria'     => $request->categoria,
+            'unidad'        => $request->unidad ?? 'unidad',
+            'referencia'    => $request->referencia,
+            'precio_compra' => $request->precio_compra,
+            'precio_venta'  => $request->precio_venta,
+            'stock'         => $request->stock,
+            'stock_minimo'  => $request->stock_minimo ?? 5,
+            'descripcion'   => $request->descripcion,
+            'foto'          => $foto,
+            'activo'        => true,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'mensaje' => 'Producto actualizado correctamente',
+        ]);
     }
 
-    $producto->update([
-        'nombre'        => $request->nombre,
-        'marca'         => $request->marca,
-        'categoria'     => $request->categoria,
-        'unidad'        => $request->unidad ?? 'unidad',
-        'referencia'    => $request->referencia,
-        'precio_compra' => $request->precio_compra,
-        'precio_venta'  => $request->precio_venta,
-        'stock'         => $request->stock,
-        'stock_minimo'  => $request->stock_minimo ?? 5,
-        'descripcion'   => $request->descripcion,
-        'foto'          => $foto,
-        'activo'        => true,
-    ]);
+    public function eliminar(Producto $producto)
+    {
+        $producto->delete();
 
-    return response()->json([
-        'success' => true,
-        'mensaje' => 'Producto actualizado correctamente',
-    ]);
-}
-
-public function eliminar(Producto $producto)
-{
-    $producto->delete();
-
-    return response()->json([
-        'success' => true,
-        'mensaje' => 'Producto eliminado correctamente',
-    ]);
-}
+        return response()->json([
+            'success' => true,
+            'mensaje' => 'Producto eliminado correctamente',
+        ]);
+    }
 }
