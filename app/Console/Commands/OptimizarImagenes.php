@@ -27,7 +27,7 @@ class OptimizarImagenes extends Command
             return;
         }
 
-        $this->info("Optimizando {$total} imágenes...");
+        $this->info("Optimizando {$total} imagenes...");
         $bar = $this->output->createProgressBar($total);
         $bar->start();
 
@@ -37,17 +37,16 @@ class OptimizarImagenes extends Command
 
         foreach ($productos as $producto) {
             try {
-                $path = 'public/' . $producto->foto;
+                $path = $producto->foto;
 
-                if (!Storage::exists($path)) {
+                if (!Storage::disk('public')->exists($path)) {
                     $bar->advance();
                     continue;
                 }
 
-                $contenido = Storage::get($path);
+                $contenido = Storage::disk('public')->get($path);
                 $pesoAntes = strlen($contenido);
 
-                // Crear imagen desde contenido
                 $img = @imagecreatefromstring($contenido);
 
                 if ($img === false) {
@@ -82,8 +81,8 @@ class OptimizarImagenes extends Command
 
                     imagedestroy($img);
                     imagedestroy($imgRedim);
+
                 } else {
-                    // Ya es pequeña pero recomprimimos a 75%
                     ob_start();
                     imagejpeg($img, null, 75);
                     $imagenOptimizada = ob_get_clean();
@@ -94,8 +93,7 @@ class OptimizarImagenes extends Command
                 $ahorro      = $pesoAntes - $pesoDespues;
                 $ahorroTotal += max(0, $ahorro);
 
-                // Sobreescribir imagen optimizada
-                Storage::put($path, $imagenOptimizada);
+                Storage::disk('public')->put($path, $imagenOptimizada);
 
                 $optimizadas++;
 
